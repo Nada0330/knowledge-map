@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>知识地图</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#fff;color:#111;font-size:13px}
+#app{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+#topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:0.5px solid #e5e5e5;flex-shrink:0;background:#fff}
+.site-title{font-size:14px;font-weight:500;letter-spacing:.05em}
+.site-sub{font-size:11px;color:#bbb;margin-left:10px}
+.toolbar{display:flex;gap:5px}
+.tbtn{font-size:11px;padding:5px 11px;border:0.5px solid #ddd;border-radius:6px;background:transparent;color:#666;cursor:pointer;font-family:inherit;transition:all .15s}
+.tbtn:hover{background:#f5f5f5;border-color:#bbb}
+.tbtn.on{background:#111;color:#fff;border-color:#111}
+#map-wrap{position:relative;flex:1;min-height:0}
+#map{width:100%;height:100%}
+#timebar{padding:8px 16px 7px;border-top:0.5px solid #eee;border-bottom:0.5px solid #eee;background:#fff;flex-shrink:0}
+.time-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.time-lbl{font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.07em}
+.time-val{font-size:15px;font-weight:500;color:#111}
+#yearSlider{width:100%;cursor:pointer;accent-color:#111}
+.era-row{display:flex;justify-content:space-between;margin-top:3px}
+.era-m{font-size:9px;color:#ccc}
+#filter-bar{display:flex;gap:5px;padding:7px 16px;border-bottom:0.5px solid #eee;flex-wrap:wrap;align-items:center;flex-shrink:0;background:#fff}
+.filter-lbl{font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.06em;margin-right:2px}
+.ftag{font-size:11px;padding:3px 10px;border:0.5px solid #e0e0e0;border-radius:20px;color:#888;cursor:pointer;transition:all .15s}
+.ftag:hover{border-color:#999;color:#333}
+.ftag.on{border-color:#111;color:#111;background:#f5f5f5;font-weight:500}
+#legend{padding:7px 16px;border-bottom:0.5px solid #eee;display:flex;gap:18px;flex-wrap:wrap;align-items:center;flex-shrink:0;background:#fff}
+.leg-row{display:flex;align-items:center;gap:6px;font-size:10px;color:#888}
+.leg-line{width:22px;height:2px}
+.leg-line.t1{background:#111}
+.leg-line.t2{background:repeating-linear-gradient(90deg,#666 0,#666 5px,transparent 5px,transparent 9px)}
+.leg-line.t3{background:repeating-linear-gradient(90deg,#999 0,#999 4px,transparent 4px,transparent 7px)}
+.leg-line.t4{background:repeating-linear-gradient(90deg,#bbb 0,#bbb 3px,transparent 3px,transparent 6px)}
+#sidebar{position:absolute;top:0;right:0;width:320px;height:100%;background:#fff;border-left:0.5px solid #e5e5e5;z-index:1000;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s ease;overflow:hidden}
+#sidebar.open{transform:translateX(0)}
+#sidebar-inner{flex:1;overflow-y:auto;padding:14px 16px}
+#sidebar-close{position:absolute;top:10px;right:12px;font-size:20px;color:#ccc;cursor:pointer;z-index:10;line-height:1;padding:2px 6px;background:#fff}
+#sidebar-close:hover{color:#333}
+.detail-type{font-size:10px;padding:2px 8px;border-radius:4px;border:0.5px solid #ddd;color:#888;margin-bottom:5px;display:inline-block}
+.detail-title{font-size:16px;font-weight:500;margin-bottom:3px;line-height:1.3;padding-right:28px}
+.detail-meta{font-size:11px;color:#888;margin-bottom:12px}
+.detail-desc{font-size:12px;color:#555;line-height:1.75;padding:10px 0;border-top:0.5px solid #eee;border-bottom:0.5px solid #eee;margin-bottom:12px}
+.conn-lbl{font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
+.conn-list{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.conn-item{display:flex;align-items:flex-start;gap:10px;padding:9px 11px;border:0.5px solid #eee;border-radius:7px;cursor:pointer;transition:border-color .15s}
+.conn-item:hover{border-color:#bbb}
+.conn-arrow{font-size:11px;color:#aaa;padding-top:1px;white-space:nowrap;min-width:36px}
+.conn-name{font-size:12px;font-weight:500;color:#111}
+.conn-sub{font-size:11px;color:#888;line-height:1.5;margin-top:2px}
+.conn-year{font-size:10px;color:#bbb;margin-top:2px}
+.city-title{font-size:11px;color:#aaa;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;padding-right:28px}
+.entries{display:flex;flex-direction:column;gap:8px}
+.ecard{border:0.5px solid #eee;border-radius:8px;padding:10px 12px}
+.ecard-top{display:flex;justify-content:space-between;align-items:flex-start;gap:6px}
+.ecard-title{font-size:13px;font-weight:500;line-height:1.3}
+.ecard-yr{font-size:10px;color:#aaa;white-space:nowrap;padding-top:2px}
+.ecard-person{font-size:11px;color:#888;margin:3px 0 5px}
+.etag{font-size:10px;padding:2px 7px;border:0.5px solid #eee;border-radius:4px;color:#888}
+.enote{font-size:11px;color:#666;line-height:1.65;border-left:2px solid #e5e5e5;padding-left:8px;margin-top:6px}
+.elinks{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.echip{font-size:10px;padding:2px 8px;border:0.5px solid #eee;border-radius:20px;color:#888}
+.section-gap{height:14px}
+#add-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:2000;align-items:center;justify-content:center}
+#add-modal.open{display:flex}
+#add-box{background:#fff;border-radius:12px;padding:20px 22px;width:440px;max-width:95vw;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:15px;font-weight:500;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
+.modal-close{font-size:20px;color:#ccc;cursor:pointer}
+.modal-close:hover{color:#333}
+.form-row{margin-bottom:10px}
+.form-lbl{font-size:11px;color:#888;margin-bottom:4px;display:block}
+.form-input{width:100%;border:0.5px solid #ddd;border-radius:6px;padding:8px 10px;font-size:13px;font-family:inherit;color:#111;background:#fff;outline:none}
+.form-input:focus{border-color:#999}
+textarea.form-input{resize:vertical;min-height:80px;line-height:1.6}
+.form-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.submit-btn{width:100%;padding:10px;background:#111;color:#fff;border:none;border-radius:7px;font-size:13px;font-family:inherit;cursor:pointer;font-weight:500;margin-top:4px}
+.submit-btn:hover{background:#333}
+#toast{display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#111;color:#fff;font-size:12px;padding:9px 18px;border-radius:20px;z-index:3000;white-space:nowrap}
+#toast.show{display:block}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="topbar">
+    <div>
+      <span class="site-title">知识地图</span>
+      <span class="site-sub">思想传播 · 地理 · 时间</span>
+    </div>
+    <div class="toolbar">
+      <button class="tbtn on" id="btn-lines" onclick="toggleLines(this)">传播路径</button>
+      <button class="tbtn on" id="btn-arrows" onclick="toggleArrows(this)">方向箭头</button>
+      <button class="tbtn" id="btn-animate" onclick="toggleAnimate(this)">▶ 演化</button>
+      <button class="tbtn" onclick="openAdd()">＋ 添加</button>
+    </div>
+  </div>
+
+  <div id="map-wrap">
+    <div id="map"></div>
+    <div id="sidebar">
+      <span id="sidebar-close" onclick="closeSidebar()">×</span>
+      <div id="sidebar-inner"></div>
+    </div>
+  </div>
+
+  <div id="timebar">
+    <div class="time-row">
+      <span class="time-lbl">时间截面</span>
+      <span class="time-val" id="yearDisplay">全部时期</span>
+    </div>
+    <input type="range" id="yearSlider" min="-500" max="2025" step="25" value="2025"/>
+    <div class="era-row">
+      <span class="era-m">前500</span><span class="era-m">公元1</span>
+      <span class="era-m">1000</span><span class="era-m">1700</span>
+      <span class="era-m">1900</span><span class="era-m">今</span>
+    </div>
+  </div>
+
+  <div id="filter-bar">
+    <span class="filter-lbl">路径类型</span>
+    <span class="ftag on" onclick="setFilter(this,'all')">全部</span>
+    <span class="ftag" onclick="setFilter(this,'inherit')">直接传承</span>
+    <span class="ftag" onclick="setFilter(this,'influence')">思想影响</span>
+    <span class="ftag" onclick="setFilter(this,'critique')">批判回应</span>
+    <span class="ftag" onclick="setFilter(this,'parallel')">平行发展</span>
+  </div>
+
+  <div id="legend">
+    <div class="leg-row"><div class="leg-line t1"></div>直接传承</div>
+    <div class="leg-row"><div class="leg-line t2"></div>思想影响</div>
+    <div class="leg-row"><div class="leg-line t3"></div>批判回应</div>
+    <div class="leg-row"><div class="leg-line t4"></div>平行发展</div>
+    <div style="margin-left:auto;font-size:10px;color:#ccc">点击城市节点或连线查看详情</div>
+  </div>
+</div>
+
+<!-- 添加弹窗 -->
+<div id="add-modal">
+  <div id="add-box">
+    <div class="modal-title">添加知识条目 <span class="modal-close" onclick="closeAdd()">×</span></div>
+    <div class="form-row"><label class="form-lbl">理论名称 *</label><input class="form-input" id="f-title" placeholder="例：规训与惩罚"/></div>
+    <div class="form-2">
+      <div><label class="form-lbl">提出者 *</label><input class="form-input" id="f-person" placeholder="例：福柯"/></div>
+      <div><label class="form-lbl">年份 *</label><input class="form-input" id="f-year" type="number" placeholder="例：1975"/></div>
+    </div>
+    <div class="form-2">
+      <div><label class="form-lbl">城市 *</label><input class="form-input" id="f-city" placeholder="例：巴黎"/></div>
+      <div><label class="form-lbl">领域</label><input class="form-input" id="f-domain" placeholder="例：社会学"/></div>
+    </div>
+    <div class="form-row"><label class="form-lbl">我的笔记</label><textarea class="form-input" id="f-note" placeholder="写下你的理解、读到它的情境、它如何改变了你的思考..."></textarea></div>
+    <div class="form-row"><label class="form-lbl">接触时间与背景</label><input class="form-input" id="f-when" placeholder="例：2023年春，比较政治课，老师提到..."/></div>
+    <div class="form-row"><label class="form-lbl">关联理论（逗号分隔）</label><input class="form-input" id="f-links" placeholder="例：生命政治，话语分析"/></div>
+    <button class="submit-btn" onclick="submitEntry()">保存到地图</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  ★ 数据区 — 在此添加你自己的城市和理论 ★
+//
+//  城市格式：
+//  {city:"城市名", lat:纬度, lng:经度, entries:[...条目...]}
+//
+//  条目格式：
+//  {year:年份, title:"理论名", person:"提出者",
+//   domain:"领域", note:"你的笔记", links:["关联1","关联2"]}
+//
+//  年份说明：公元前用负数，如公元前380年写 -380
+// ══════════════════════════════════════════════════════
+
+var CITIES = [
+  {city:"雅典",lat:37.97,lng:23.73,entries:[
+    {year:-380,title:"理念论",person:"柏拉图",domain:"哲学",
+     note:"可感世界是理念世界的影子。哲学导论课上第一次读到，颠覆了我对"真实"的理解，后来发现它深刻影响了基督教神学与中世纪经院哲学。",
+     links:["洞穴隐喻","基督教神学","形而上学"]},
+    {year:-335,title:"形而上学·实体论",person:"亚里士多德",domain:"哲学",
+     note:"实体存在于个别事物中，与柏拉图相反。这一分歧奠定了西方哲学两大传统的起点——经验主义与唯理主义的远古根源。",
+     links:["经验主义","逻辑学","理念论"]},
+  ]},
+  {city:"伦敦",lat:51.51,lng:-0.13,entries:[
+    {year:1651,title:"利维坦·社会契约",person:"霍布斯",domain:"政治哲学",
+     note:"自然状态是一切人对一切人的战争，人们让渡权利给主权者换取秩序。与卢梭形成强烈对比——同样的契约论框架，对人性的预设完全相反。",
+     links:["卢梭社会契约","主权理论","自然状态"]},
+    {year:1776,title:"国富论·看不见的手",person:"亚当·斯密",domain:"经济学",
+     note:"市场通过价格机制自发协调资源配置。读原文才发现斯密对道德的关怀远超教科书呈现——他同时也是道德哲学家。",
+     links:["自由市场","劳动价值论","道德情操论"]},
+    {year:1859,title:"物种起源·自然选择",person:"达尔文",domain:"自然科学",
+     note:"生物通过变异和自然选择演化。让我警惕社会达尔文主义的滥用——科学概念被挪用到社会领域的危险。",
+     links:["社会达尔文主义","进化心理学"]},
+  ]},
+  {city:"巴黎",lat:48.85,lng:2.35,entries:[
+    {year:1762,title:"社会契约论·公意",person:"卢梭",domain:"政治哲学",
+     note:"公意不是个别意志的叠加，而是共同体整体利益。法国大革命直接援引了这个概念，让我思考理论被政治实践挪用时会发生什么扭曲。",
+     links:["法国大革命","民主理论","霍布斯契约"]},
+    {year:1975,title:"规训与惩罚",person:"福柯",domain:"社会学",
+     note:"现代权力不再依赖暴力，而通过规训内化于个体。让我重新审视学校、医院等"正常"机构背后的权力运作机制。",
+     links:["生命政治","话语分析","启蒙辩证法"]},
+  ]},
+  {city:"柏林",lat:52.52,lng:13.40,entries:[
+    {year:1807,title:"精神现象学·辩证法",person:"黑格尔",domain:"哲学",
+     note:"正题-反题-合题，历史是精神自我实现的过程。是马克思、存在主义、法兰克福学派的共同土壤，理解它才能理解19世纪后的西方思想。",
+     links:["马克思唯物史观","辩证法","法兰克福学派"]},
+    {year:1867,title:"资本论·剩余价值",person:"马克思",domain:"政治经济学",
+     note:"工人创造的价值与获得报酬之差被资本占有。与韦伯的分析构成对话：一个强调结构性剥削，一个强调文化与精神的作用。",
+     links:["韦伯新教伦理","异化理论","阶级分析"]},
+    {year:1904,title:"新教伦理与资本主义精神",person:"韦伯",domain:"社会学",
+     note:"资本主义兴起与新教天职观念密切相关。修正了纯粹唯物史观的局限，让我意识到文化与经济之间的双向塑造关系。",
+     links:["马克思剩余价值","官僚制","理性化"]},
+  ]},
+  {city:"维也纳",lat:48.21,lng:16.37,entries:[
+    {year:1900,title:"梦的解析·无意识",person:"弗洛伊德",domain:"心理学",
+     note:"人的行为受潜意识驱动，梦是无意识愿望的伪装满足。让我思考"有解释力"与"可证伪"的区别——精神分析在科学性上存疑。",
+     links:["荣格原型","拉康镜像","精神分析批评"]},
+  ]},
+  {city:"法兰克福",lat:50.11,lng:8.68,entries:[
+    {year:1944,title:"启蒙辩证法",person:"霍克海默/阿多诺",domain:"批判理论",
+     note:"启蒙理性走向了它的反面，变成统治工具。质疑"现代性=进步"的预设，让我对媒体和文化工业有了批判性视角。",
+     links:["文化工业","马克思异化","福柯权力"]},
+  ]},
+  {city:"剑桥",lat:52.20,lng:0.12,entries:[
+    {year:1936,title:"就业利息货币通论",person:"凯恩斯",domain:"经济学",
+     note:"市场不能自我出清，政府需干预以维持充分就业。理解二战后福利国家的理论基础，也理解了新自由主义对凯恩斯主义的反动。",
+     links:["自由市场批判","货币政策","新自由主义"]},
+  ]},
+  {city:"芝加哥",lat:41.88,lng:-87.63,entries:[
+    {year:1962,title:"科学革命的结构·范式",person:"库恩",domain:"科学哲学",
+     note:"科学不是线性积累，而是范式间的革命性断裂。让我重新思考人文学科的知识生产方式，也解释了为何不同学派之间难以真正对话。",
+     links:["波普尔证伪","知识社会学","后实证主义"]},
+  ]},
+  {city:"北京",lat:39.91,lng:116.39,entries:[
+    {year:-500,title:"仁·礼·正名",person:"孔子",domain:"伦理/政治",
+     note:"仁者爱人，礼是社会秩序基础。一直在思考儒家伦理与西方政治哲学的可比较性——两者都关心好的社会，但路径完全不同。",
+     links:["社群主义","礼治vs法治","东亚现代性"]},
+  ]},
+  {city:"开罗",lat:30.04,lng:31.24,entries:[
+    {year:1370,title:"历史绪论·阿萨比亚",person:"伊本·赫勒敦",domain:"历史学",
+     note:"社会凝聚力是王朝兴衰的关键。他是社会学先驱，但在西方学术史中长期被忽视——这本身就是知识生产的政治问题。",
+     links:["文明兴衰","社会学起源","后殖民理论"]},
+  ]},
+];
+
+// ══════════════════════════════════════════════════════
+//  ★ 传播连线数据 ★
+//
+//  type 可选值：
+//    inherit  = 直接传承（实线）
+//    influence= 思想影响（长虚线）
+//    critique = 批判回应（短虚线）
+//    parallel = 平行发展（点虚线）
+// ══════════════════════════════════════════════════════
+
+var LINKS = [
+  {from:"雅典",to:"柏林",type:"inherit",year:1807,
+   label:"柏拉图→黑格尔",
+   desc:"黑格尔辩证法直接继承柏拉图的理念论，将其历史化——绝对精神在历史中展开自身，呼应了柏拉图"理念世界"的结构，但加入了时间与运动的维度。"},
+  {from:"雅典",to:"伦敦",type:"inherit",year:1651,
+   label:"亚里士多德→英国经验主义",
+   desc:"洛克、休谟的经验主义直接继承亚里士多德"知识来自感官经验"的路线，反对柏拉图式的先天理念，构成英国哲学传统的根基。"},
+  {from:"伦敦",to:"巴黎",type:"critique",year:1762,
+   label:"霍布斯→卢梭（对话与反驳）",
+   desc:"卢梭明确回应霍布斯的"自然状态=战争"，提出相反的"自然人本善"论。两人共用社会契约框架，却得出截然不同的政治结论。"},
+  {from:"巴黎",to:"柏林",type:"inherit",year:1807,
+   label:"卢梭→黑格尔",
+   desc:"黑格尔将卢梭的"公意"概念哲学化为"伦理实体"，国家不再是契约产物，而是精神自由实现的场域。"},
+  {from:"柏林",to:"伦敦",type:"inherit",year:1867,
+   label:"黑格尔→马克思（唯物倒转）",
+   desc:"马克思将黑格尔的辩证法"倒转"：不是精神驱动历史，而是物质生产关系驱动历史。马克思在伦敦大英图书馆完成《资本论》。"},
+  {from:"柏林",to:"法兰克福",type:"inherit",year:1944,
+   label:"黑格尔/马克思→法兰克福学派",
+   desc:"法兰克福学派继承黑格尔辩证法与马克思批判理论，将其应用于分析20世纪资本主义文化与意识形态。"},
+  {from:"法兰克福",to:"巴黎",type:"influence",year:1975,
+   label:"批判理论→福柯",
+   desc:"法兰克福学派对启蒙理性与现代权力的批判深刻影响了福柯，但福柯拒绝其宏大叙事，转向对具体权力机制的微观分析。"},
+  {from:"伦敦",to:"芝加哥",type:"critique",year:1962,
+   label:"实证主义→库恩（范式批判）",
+   desc:"库恩直接批判了从培根到维也纳学派的实证主义科学观，指出科学史从不符合"归纳积累"模型，每一次革命都是范式的断裂。"},
+  {from:"维也纳",to:"巴黎",type:"influence",year:1975,
+   label:"弗洛伊德→拉康/福柯",
+   desc:"拉康将弗洛伊德重新语言学化，福柯则从精神分析借用话语概念并加以颠覆。维也纳精神分析传统是巴黎结构主义的重要上游。"},
+  {from:"北京",to:"开罗",type:"parallel",year:1370,
+   label:"儒家·伊斯兰政治思想（平行）",
+   desc:"孔子与伊本·赫勒敦几乎同样关心王朝秩序与社会凝聚力，但彼此独立发展于不同文明。对比揭示了"好政府"这一普遍问题在不同文明中的不同解答路径。"},
+  {from:"伦敦",to:"柏林",type:"influence",year:1867,
+   label:"斯密→马克思（劳动价值论）",
+   desc:"马克思继承并批判了斯密的劳动价值论：斯密认为劳动创造价值，马克思则追问谁占有了劳动所创造的剩余价值。"},
+];
+
+// ══════════════════════════════════════════════════════
+//  城市坐标库（添加新城市时自动匹配，不在库中的随机定位）
+// ══════════════════════════════════════════════════════
+var CITY_COORDS = {
+  "巴黎":[48.85,2.35],"伦敦":[51.51,-0.13],"柏林":[52.52,13.40],
+  "纽约":[40.71,-74.01],"洛杉矶":[34.05,-118.24],"芝加哥":[41.88,-87.63],
+  "波士顿":[42.36,-71.06],"华盛顿":[38.90,-77.03],"旧金山":[37.77,-122.42],
+  "剑桥":[52.20,0.12],"牛津":[51.75,-1.26],"爱丁堡":[55.95,-3.19],
+  "阿姆斯特丹":[52.37,4.89],"布鲁塞尔":[50.85,4.35],"日内瓦":[46.20,6.14],
+  "苏黎世":[47.38,8.54],"维也纳":[48.21,16.37],"布拉格":[50.08,14.43],
+  "华沙":[52.23,21.01],"斯德哥尔摩":[59.33,18.07],"哥本哈根":[55.68,12.57],
+  "莫斯科":[55.75,37.62],"圣彼得堡":[59.93,30.32],"马德里":[40.42,-3.70],
+  "巴塞罗那":[41.38,2.17],"里斯本":[38.72,-9.14],"罗马":[41.90,12.49],
+  "米兰":[45.46,9.19],"佛罗伦萨":[43.77,11.25],"雅典":[37.97,23.73],
+  "伊斯坦布尔":[41.01,28.95],"开罗":[30.04,31.24],"亚历山大":[31.20,29.92],
+  "巴格达":[33.34,44.40],"德黑兰":[35.69,51.42],"耶路撒冷":[31.77,35.22],
+  "北京":[39.91,116.39],"上海":[31.23,121.47],"南京":[32.06,118.79],
+  "西安":[34.27,108.95],"广州":[23.13,113.26],"成都":[30.57,104.07],
+  "东京":[35.68,139.69],"京都":[35.01,135.77],"大阪":[34.69,135.50],
+  "首尔":[37.57,126.98],"孟买":[19.07,72.87],"德里":[28.61,77.21],
+  "加尔各答":[22.57,88.36],"突尼斯":[36.82,10.17],"开普敦":[-33.92,18.42],
+  "圣保罗":[-23.55,-46.63],"里约热内卢":[-22.91,-43.17],
+  "布宜诺斯艾利斯":[-34.60,-58.38],"墨西哥城":[19.43,-99.13],
+  "悉尼":[-33.87,151.21],"墨尔本":[-37.81,144.96],
+  "法兰克福":[50.11,8.68],"海德堡":[49.40,8.69],"慕尼黑":[48.14,11.58],
+  "哥尼斯堡":[54.71,20.51],"耶拿":[50.93,11.59],"魏玛":[50.98,11.33],
+};
+
+// ══════════════════════════════════════════════════════
+//  以下为地图逻辑，无需修改
+// ══════════════════════════════════════════════════════
+var cityIndex={};
+CITIES.forEach(function(c){cityIndex[c.city]=c;});
+
+var currentYear=2025,showLines=true,showArrows=true,filterType='all',animTimer=null;
+var polylines=[],markers=[];
+
+var TYPE_COLOR={inherit:'#111',influence:'#555',critique:'#999',parallel:'#bbb'};
+var TYPE_DASH ={inherit:null,influence:'6,4',critique:'4,4',parallel:'3,6'};
+var TYPE_LABEL={inherit:'直接传承',influence:'思想影响',critique:'批判回应',parallel:'平行发展'};
+
+var map=L.map('map',{zoomControl:true,scrollWheelZoom:true}).setView([35,20],2);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
+  attribution:'© <a href="https://carto.com">CARTO</a> © <a href="https://openstreetmap.org">OSM</a>',
+  maxZoom:18
+}).addTo(map);
+
+function getVisible(e){return e.filter(function(x){return x.year<=currentYear;});}
+
+function makeMarker(city){
+  var vis=getVisible(city.entries);
+  if(!vis.length)return null;
+  var sz=Math.min(10+vis.length*5,30);
+  var icon=L.divIcon({className:'',
+    html:'<div style="width:'+sz+'px;height:'+sz+'px;border-radius:50%;background:#111;border:2.5px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;cursor:pointer"><span style="color:#fff;font-size:'+Math.max(8,sz/3.2)+'px;font-weight:500">'+vis.length+'</span></div>',
+    iconSize:[sz,sz],iconAnchor:[sz/2,sz/2]});
+  var m=L.marker([city.lat,city.lng],{icon:icon}).addTo(map);
+  m.on('click',(function(c){return function(){showCityPanel(c,getVisible(c.entries));};})(city));
+  return m;
+}
+
+function renderMarkers(){
+  markers.forEach(function(m){try{map.removeLayer(m);}catch(e){}});
+  markers=[];
+  CITIES.forEach(function(c){var m=makeMarker(c);if(m)markers.push(m);});
+}
+
+function renderLines(){
+  polylines.forEach(function(p){try{map.removeLayer(p);}catch(e){}});
+  polylines=[];
+  if(!showLines)return;
+  LINKS.filter(function(r){
+    if(r.year>currentYear)return false;
+    if(filterType!=='all'&&r.type!==filterType)return false;
+    var a=cityIndex[r.from],b=cityIndex[r.to];
+    return a&&b&&getVisible(a.entries).length&&getVisible(b.entries).length;
+  }).forEach(function(r){
+    var a=cityIndex[r.from],b=cityIndex[r.to];
+    var color=TYPE_COLOR[r.type]||'#aaa';
+    var opts={color:color,weight:1.5,opacity:.75};
+    if(TYPE_DASH[r.type])opts.dashArray=TYPE_DASH[r.type];
+    var midLat=(a.lat+b.lat)/2+Math.abs(a.lng-b.lng)*0.08;
+    var p=L.polyline([[a.lat,a.lng],[midLat,(a.lng+b.lng)/2],[b.lat,b.lng]],opts).addTo(map);
+    p.bindTooltip('<span style="font-size:11px;color:#333">'+r.label+'</span>',{sticky:true,opacity:.92});
+    p.on('click',(function(lk){return function(){showLinkPanel(lk);};})(r));
+    polylines.push(p);
+    if(showArrows){
+      try{
+        var angle=Math.atan2(b.lng-a.lng,b.lat-a.lat)*180/Math.PI-90;
+        var ai=L.divIcon({className:'',
+          html:'<div style="width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:9px solid '+color+';opacity:.75;transform:rotate('+angle+'deg)"></div>',
+          iconSize:[10,9],iconAnchor:[5,5]});
+        var am=L.marker([b.lat,b.lng],{icon:ai,interactive:false,zIndexOffset:-100}).addTo(map);
+        polylines.push(am);
+      }catch(e){}
+    }
+  });
+}
+
+function openSidebar(html){
+  document.getElementById('sidebar-inner').innerHTML=html;
+  document.getElementById('sidebar').classList.add('open');
+}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');}
+
+function showLinkPanel(r){
+  var a=cityIndex[r.from],b=cityIndex[r.to];
+  openSidebar(
+    '<div class="detail-type">'+TYPE_LABEL[r.type]+'</div>'+
+    '<div class="detail-title">'+r.label+'</div>'+
+    '<div class="detail-meta">'+r.from+' → '+r.to+' · '+(r.year<0?'公元前'+Math.abs(r.year):r.year)+'年</div>'+
+    '<div class="detail-desc">'+r.desc+'</div>'+
+    '<div class="conn-lbl">相关城市</div>'+
+    '<div class="conn-list">'+
+      '<div class="conn-item" onclick="showCityPanelByName(\''+r.from+'\')">'+
+        '<span class="conn-arrow">← 起点</span>'+
+        '<div><div class="conn-name">'+r.from+'</div>'+
+        '<div class="conn-sub">'+(a?a.entries.map(function(e){return e.title;}).join('、'):'')+'</div></div>'+
+      '</div>'+
+      '<div class="conn-item" onclick="showCityPanelByName(\''+r.to+'\')">'+
+        '<span class="conn-arrow">→ 终点</span>'+
+        '<div><div class="conn-name">'+r.to+'</div>'+
+        '<div class="conn-sub">'+(b?b.entries.map(function(e){return e.title;}).join('、'):'')+'</div></div>'+
+      '</div>'+
+    '</div>'
+  );
+}
+
+function showCityPanelByName(n){var c=cityIndex[n];if(c)showCityPanel(c,getVisible(c.entries));}
+
+function showCityPanel(city,vis){
+  var entriesHtml=vis.sort(function(a,b){return a.year-b.year;}).map(function(e){
+    return '<div class="ecard">'+
+      '<div class="ecard-top"><span class="ecard-title">'+e.title+'</span>'+
+      '<span class="ecard-yr">'+(e.year<0?'前'+Math.abs(e.year)+'年':e.year+'年')+'</span></div>'+
+      '<div class="ecard-person">'+e.person+'</div>'+
+      '<span class="etag">'+e.domain+'</span>'+
+      (e.note?'<div class="enote">'+e.note+'</div>':'')+
+      (e.links&&e.links.length?'<div class="elinks">'+e.links.map(function(l){return '<span class="echip">↗ '+l+'</span>';}).join('')+'</div>':'')+
+    '</div>';
+  }).join('');
+  var rel=LINKS.filter(function(r){return(r.from===city.city||r.to===city.city)&&r.year<=currentYear;});
+  var linksHtml=rel.length?(
+    '<div class="section-gap"></div>'+
+    '<div class="conn-lbl">传播关联（'+rel.length+'条）</div>'+
+    '<div class="conn-list">'+rel.map(function(r){
+      var dir=r.from===city.city?'→ 输出':'← 来源';
+      var other=r.from===city.city?r.to:r.from;
+      return '<div class="conn-item" onclick=\'showLinkPanel('+JSON.stringify(r)+')\'>'+
+        '<span class="conn-arrow">'+dir+'</span>'+
+        '<div><div class="conn-name">'+r.label+'</div>'+
+        '<div class="conn-sub">'+other+' · '+TYPE_LABEL[r.type]+'</div>'+
+        '<div class="conn-year">'+(r.year<0?'公元前'+Math.abs(r.year):r.year)+'年</div></div>'+
+      '</div>';
+    }).join('')+'</div>'
+  ):'';
+  openSidebar(
+    '<div class="city-title">'+city.city+' · '+vis.length+' 条理论</div>'+
+    '<div class="entries">'+entriesHtml+'</div>'+linksHtml
+  );
+}
+
+function toggleLines(btn){showLines=!showLines;btn.classList.toggle('on',showLines);renderLines();}
+function toggleArrows(btn){showArrows=!showArrows;btn.classList.toggle('on',showArrows);renderLines();}
+function setFilter(el,type){
+  document.querySelectorAll('.ftag').forEach(function(t){t.classList.remove('on');});
+  el.classList.add('on');filterType=type;renderLines();
+}
+function toggleAnimate(btn){
+  if(animTimer){clearInterval(animTimer);animTimer=null;btn.textContent='▶ 演化';btn.classList.remove('on');return;}
+  btn.textContent='■ 停止';btn.classList.add('on');
+  var y=-500;currentYear=y;
+  document.getElementById('yearSlider').value=y;
+  document.getElementById('yearDisplay').textContent='公元前500年';
+  renderMarkers();renderLines();closeSidebar();
+  animTimer=setInterval(function(){
+    y+=25;
+    if(y>2025){clearInterval(animTimer);animTimer=null;btn.textContent='▶ 演化';btn.classList.remove('on');return;}
+    currentYear=y;
+    document.getElementById('yearSlider').value=y;
+    document.getElementById('yearDisplay').textContent=y<0?'公元前'+Math.abs(y)+'年':y+'年';
+    renderMarkers();renderLines();
+  },120);
+}
+
+document.getElementById('yearSlider').addEventListener('input',function(){
+  currentYear=parseInt(this.value);
+  document.getElementById('yearDisplay').textContent=currentYear<0?'公元前'+Math.abs(currentYear)+'年':currentYear+'年';
+  renderMarkers();renderLines();
+});
+
+function openAdd(){document.getElementById('add-modal').classList.add('open');}
+function closeAdd(){document.getElementById('add-modal').classList.remove('open');}
+document.getElementById('add-modal').addEventListener('click',function(e){if(e.target===this)closeAdd();});
+
+function submitEntry(){
+  var title=document.getElementById('f-title').value.trim();
+  var city=document.getElementById('f-city').value.trim();
+  if(!title||!city){showToast('请填写理论名称和城市');return;}
+  var entry={
+    year:parseInt(document.getElementById('f-year').value)||0,
+    title:title,
+    person:document.getElementById('f-person').value.trim(),
+    domain:document.getElementById('f-domain').value.trim(),
+    note:document.getElementById('f-note').value.trim(),
+    links:document.getElementById('f-links').value.split(/[，,]/).map(function(s){return s.trim();}).filter(Boolean)
+  };
+  var existing=cityIndex[city];
+  if(existing){existing.entries.push(entry);}
+  else{
+    var coord=CITY_COORDS[city]||[20+Math.random()*20,10+Math.random()*40];
+    var nc={city:city,lat:coord[0],lng:coord[1],entries:[entry]};
+    CITIES.push(nc);cityIndex[city]=nc;
+  }
+  renderMarkers();renderLines();
+  ['f-title','f-person','f-year','f-city','f-domain','f-note','f-when','f-links'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.value='';
+  });
+  closeAdd();
+  showToast('已添加：'+title+' · '+city);
+}
+
+function showToast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},2500);
+}
+
+renderMarkers();
+renderLines();
+</script>
+</body>
+</html>
