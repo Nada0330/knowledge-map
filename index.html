@@ -87,12 +87,17 @@ textarea.form-input{resize:vertical;min-height:80px;line-height:1.6}
 </head>
 <body>
 <div id="app">
-  <div id="topbar">
-    <div>
-      <span class="site-title">知识地图</span>
-      <span class="site-sub">思想传播 · 地理 · 时间</span>
-    </div>
-    <div class="toolbar">
+<div id="topbar">
+  <div>
+    <span class="site-title">Nada's</span>
+    <span class="site-sub">思想传播 · 地理 · 时间</span>
+  </div>
+  <div id="searchbox" style="display:flex;align-items:center;gap:6px;background:#0d1117;border:0.5px solid #30363d;border-radius:6px;padding:4px 10px;flex:0 0 220px">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#484f58" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="searchInput" type="text" placeholder="搜索理论、人物、城市..." oninput="doSearch(this.value)" style="background:transparent;border:none;outline:none;font-size:12px;color:#e6edf3;width:100%;font-family:inherit"/>
+    <span id="searchClear" onclick="clearSearch()" style="font-size:14px;color:#484f58;cursor:pointer;display:none">×</span>
+  </div>
+  <div class="toolbar">
       <button class="tbtn on" id="btn-lines" onclick="toggleLines(this)">传播路径</button>
       <button class="tbtn on" id="btn-arrows" onclick="toggleArrows(this)">方向箭头</button>
       <button class="tbtn" id="btn-animate" onclick="toggleAnimate(this)">▶ 演化</button>
@@ -440,6 +445,7 @@ function makeMarker(city){
     html:'<div style="width:'+sz+'px;height:'+sz+'px;border-radius:50%;background:#388bfd;border:2.5px solid #0d1117;box-shadow:0 1px 5px rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;cursor:pointer"><span style="color:#fff;font-size:'+Math.max(8,sz/3.2)+'px;font-weight:500">'+vis.length+'</span></div>',
     iconSize:[sz,sz],iconAnchor:[sz/2,sz/2]});
   var m=L.marker([city.lat,city.lng],{icon:icon}).addTo(map);
+  m._city = city;
   m.on('click',(function(c){return function(){showCityPanel(c,getVisible(c.entries));};})(city));
   return m;
 }
@@ -577,6 +583,31 @@ function showToast(msg){
 
 renderMarkers();
 renderLines();
+  function doSearch(q){
+  q = q.trim().toLowerCase();
+  var clearBtn = document.getElementById('searchClear');
+  clearBtn.style.display = q ? 'block' : 'none';
+  if(!q){ markers.forEach(function(m){m.setOpacity(1);}); return; }
+  markers.forEach(function(m){
+    var city = m._city;
+    if(!city) return;
+    var hit = city.city.toLowerCase().includes(q) ||
+      city.entries.some(function(e){
+        return (e.title||'').toLowerCase().includes(q) ||
+               (e.person||'').toLowerCase().includes(q) ||
+               (e.domain||'').toLowerCase().includes(q) ||
+               (e.note||'').toLowerCase().includes(q) ||
+               (e.links||[]).some(function(l){return l.toLowerCase().includes(q);});
+      });
+    m.setOpacity(hit ? 1 : 0.15);
+  });
+}
+
+function clearSearch(){
+  document.getElementById('searchInput').value='';
+  document.getElementById('searchClear').style.display='none';
+  markers.forEach(function(m){m.setOpacity(1);});
+}
 </script>
 </body>
 </html>
