@@ -139,7 +139,6 @@ textarea.form-input{resize:vertical;min-height:80px;line-height:1.6}
   </div>
 </div>
 
-<!-- 添加弹窗 -->
 <div id="add-modal">
   <div id="add-box">
     <div class="modal-title">添加知识条目 <span class="modal-close" onclick="closeAdd()">×</span></div>
@@ -153,7 +152,7 @@ textarea.form-input{resize:vertical;min-height:80px;line-height:1.6}
       <div><label class="form-lbl">领域</label><input class="form-input" id="f-domain" placeholder="例：社会学"/></div>
     </div>
     <div class="form-row"><label class="form-lbl">我的笔记</label><textarea class="form-input" id="f-note" placeholder="写下你的理解、读到它的情境、它如何改变了你的思考..."></textarea></div>
-    <div class="form-row"><label class="form-lbl">接触时间与背景</label><input class="form-input" id="f-when" placeholder="例：2023年春，比较政治课，老师提到..."/></div>
+    <div class="form-row"><label class="form-lbl">接触时间与背景</label><input class="form-input" id="f-when" placeholder="例：2023年春，比较政治课"/></div>
     <div class="form-row"><label class="form-lbl">关联理论（逗号分隔）</label><input class="form-input" id="f-links" placeholder="例：生命政治，话语分析"/></div>
     <button class="submit-btn" onclick="submitEntry()">保存到地图</button>
   </div>
@@ -162,18 +161,11 @@ textarea.form-input{resize:vertical;min-height:80px;line-height:1.6}
 <div id="toast"></div>
 
 <script>
-// ══════════════════════════════════════════════════════
-//  ★ 数据区 — 在此添加你自己的城市和理论 ★
-//
-//  城市格式：
-//  {city:"城市名", lat:纬度, lng:经度, entries:[...条目...]}
-//
-//  条目格式：
-//  {year:年份, title:"理论名", person:"提出者",
-//   domain:"领域", note:"你的笔记", links:["关联1","关联2"]}
-//
-//  年份说明：公元前用负数，如公元前380年写 -380
-// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════
+// 数据区 — 在此添加你的城市和理论
+// 笔记中如需引号，请用单引号 ' 而非 " "
+// 公元前年份用负数，如公元前380年写 -380
+// ══════════════════════════════════════
 
 var CITIES = [
   {city:"雅典",lat:37.97,lng:23.73,entries:[
@@ -188,7 +180,7 @@ var CITIES = [
     {year:1651,title:"利维坦·社会契约",person:"霍布斯",domain:"政治哲学",
      note:"自然状态是一切人对一切人的战争，人们让渡权利给主权者换取秩序。与卢梭形成强烈对比——同样的契约论框架，对人性的预设完全相反。",
      links:["卢梭社会契约","主权理论","自然状态"]},
-{year:1689,title:"人类理解论·语言批判",person:"约翰·洛克",domain:"认识论/语言哲学",
+    {year:1689,title:"人类理解论·语言批判",person:"约翰·洛克",domain:"认识论/语言哲学",
      note:"艰涩或用错的文字，哪怕极少甚或没有任何意义，也会由于习俗规定的缘故被误认为深奥学问。洛克在攻击经院哲学——用晦涩掩盖空洞。这让我想到学术写作里的同类现象：术语有时是思想的载体，有时只是门槛的伪装。",
      links:["经院哲学批判","语言游戏","维特根斯坦","奥卡姆剃刀"]},
     {year:1776,title:"国富论·看不见的手",person:"亚当·斯密",domain:"经济学",
@@ -203,7 +195,7 @@ var CITIES = [
      note:"公意不是个别意志的叠加，而是共同体整体利益。法国大革命直接援引了这个概念，让我思考理论被政治实践挪用时会发生什么扭曲。",
      links:["法国大革命","民主理论","霍布斯契约"]},
     {year:1975,title:"规训与惩罚",person:"福柯",domain:"社会学",
-     note:"现代权力不再依赖暴力，而通过规训内化于个体。让我重新审视学校、医院等"正常"机构背后的权力运作机制。",
+     note:"现代权力不再依赖暴力，而通过规训内化于个体。让我重新审视学校、医院等机构背后的权力运作机制。",
      links:["生命政治","话语分析","启蒙辩证法"]},
   ]},
   {city:"柏林",lat:52.52,lng:13.40,entries:[
@@ -219,12 +211,12 @@ var CITIES = [
   ]},
   {city:"维也纳",lat:48.21,lng:16.37,entries:[
     {year:1900,title:"梦的解析·无意识",person:"弗洛伊德",domain:"心理学",
-     note:"人的行为受潜意识驱动，梦是无意识愿望的伪装满足。让我思考"有解释力"与"可证伪"的区别——精神分析在科学性上存疑。",
+     note:"人的行为受潜意识驱动，梦是无意识愿望的伪装满足。让我思考'有解释力'与'可证伪'的区别——精神分析在科学性上存疑。",
      links:["荣格原型","拉康镜像","精神分析批评"]},
   ]},
   {city:"法兰克福",lat:50.11,lng:8.68,entries:[
     {year:1944,title:"启蒙辩证法",person:"霍克海默/阿多诺",domain:"批判理论",
-     note:"启蒙理性走向了它的反面，变成统治工具。质疑"现代性=进步"的预设，让我对媒体和文化工业有了批判性视角。",
+     note:"启蒙理性走向了它的反面，变成统治工具。质疑'现代性=进步'的预设，让我对媒体和文化工业有了批判性视角。",
      links:["文化工业","马克思异化","福柯权力"]},
   ]},
   {city:"剑桥",lat:52.20,lng:0.12,entries:[
@@ -249,32 +241,22 @@ var CITIES = [
   ]},
 ];
 
-// ══════════════════════════════════════════════════════
-//  ★ 传播连线数据 ★
-//
-//  type 可选值：
-//    inherit  = 直接传承（实线）
-//    influence= 思想影响（长虚线）
-//    critique = 批判回应（短虚线）
-//    parallel = 平行发展（点虚线）
-// ══════════════════════════════════════════════════════
-
 var LINKS = [
   {from:"雅典",to:"柏林",type:"inherit",year:1807,
    label:"柏拉图→黑格尔",
-   desc:"黑格尔辩证法直接继承柏拉图的理念论，将其历史化——绝对精神在历史中展开自身，呼应了柏拉图"理念世界"的结构，但加入了时间与运动的维度。"},
+   desc:"黑格尔辩证法直接继承柏拉图的理念论，将其历史化——绝对精神在历史中展开自身，呼应了柏拉图理念世界的结构，但加入了时间与运动的维度。"},
   {from:"雅典",to:"伦敦",type:"inherit",year:1651,
    label:"亚里士多德→英国经验主义",
-   desc:"洛克、休谟的经验主义直接继承亚里士多德"知识来自感官经验"的路线，反对柏拉图式的先天理念，构成英国哲学传统的根基。"},
+   desc:"洛克、休谟的经验主义直接继承亚里士多德知识来自感官经验的路线，反对柏拉图式的先天理念，构成英国哲学传统的根基。"},
   {from:"伦敦",to:"巴黎",type:"critique",year:1762,
    label:"霍布斯→卢梭（对话与反驳）",
-   desc:"卢梭明确回应霍布斯的"自然状态=战争"，提出相反的"自然人本善"论。两人共用社会契约框架，却得出截然不同的政治结论。"},
+   desc:"卢梭明确回应霍布斯的自然状态=战争，提出相反的自然人本善论。两人共用社会契约框架，却得出截然不同的政治结论。"},
   {from:"巴黎",to:"柏林",type:"inherit",year:1807,
    label:"卢梭→黑格尔",
-   desc:"黑格尔将卢梭的"公意"概念哲学化为"伦理实体"，国家不再是契约产物，而是精神自由实现的场域。"},
+   desc:"黑格尔将卢梭的公意概念哲学化为伦理实体，国家不再是契约产物，而是精神自由实现的场域。"},
   {from:"柏林",to:"伦敦",type:"inherit",year:1867,
    label:"黑格尔→马克思（唯物倒转）",
-   desc:"马克思将黑格尔的辩证法"倒转"：不是精神驱动历史，而是物质生产关系驱动历史。马克思在伦敦大英图书馆完成《资本论》。"},
+   desc:"马克思将黑格尔的辩证法倒转：不是精神驱动历史，而是物质生产关系驱动历史。马克思在伦敦大英图书馆完成资本论。"},
   {from:"柏林",to:"法兰克福",type:"inherit",year:1944,
    label:"黑格尔/马克思→法兰克福学派",
    desc:"法兰克福学派继承黑格尔辩证法与马克思批判理论，将其应用于分析20世纪资本主义文化与意识形态。"},
@@ -283,73 +265,58 @@ var LINKS = [
    desc:"法兰克福学派对启蒙理性与现代权力的批判深刻影响了福柯，但福柯拒绝其宏大叙事，转向对具体权力机制的微观分析。"},
   {from:"伦敦",to:"芝加哥",type:"critique",year:1962,
    label:"实证主义→库恩（范式批判）",
-   desc:"库恩直接批判了从培根到维也纳学派的实证主义科学观，指出科学史从不符合"归纳积累"模型，每一次革命都是范式的断裂。"},
+   desc:"库恩直接批判了从培根到维也纳学派的实证主义科学观，指出科学史从不符合归纳积累模型，每一次革命都是范式的断裂。"},
   {from:"维也纳",to:"巴黎",type:"influence",year:1975,
    label:"弗洛伊德→拉康/福柯",
    desc:"拉康将弗洛伊德重新语言学化，福柯则从精神分析借用话语概念并加以颠覆。维也纳精神分析传统是巴黎结构主义的重要上游。"},
   {from:"北京",to:"开罗",type:"parallel",year:1370,
    label:"儒家·伊斯兰政治思想（平行）",
-   desc:"孔子与伊本·赫勒敦几乎同样关心王朝秩序与社会凝聚力，但彼此独立发展于不同文明。对比揭示了"好政府"这一普遍问题在不同文明中的不同解答路径。"},
+   desc:"孔子与伊本·赫勒敦几乎同样关心王朝秩序与社会凝聚力，但彼此独立发展于不同文明。对比揭示了好政府这一普遍问题在不同文明中的不同解答路径。"},
   {from:"伦敦",to:"柏林",type:"influence",year:1867,
    label:"斯密→马克思（劳动价值论）",
    desc:"马克思继承并批判了斯密的劳动价值论：斯密认为劳动创造价值，马克思则追问谁占有了劳动所创造的剩余价值。"},
   {from:"伦敦",to:"维也纳",type:"influence",year:1900,
- label:"洛克语言批判→逻辑实证主义",
- desc:"维也纳学派继承洛克对语言滥用的警惕，发展为"意义的可证实性原则"——无法被经验验证的命题是无意义的。两者都在清理哲学语言，但路径不同：洛克诉诸常识，维也纳诉诸逻辑。"},
+   label:"洛克语言批判→逻辑实证主义",
+   desc:"维也纳学派继承洛克对语言滥用的警惕，发展为意义的可证实性原则——无法被经验验证的命题是无意义的。两者都在清理哲学语言，但路径不同：洛克诉诸常识，维也纳诉诸逻辑。"},
 ];
 
-// ══════════════════════════════════════════════════════
-//  城市坐标库（添加新城市时自动匹配，不在库中的随机定位）
-// ══════════════════════════════════════════════════════
 var CITY_COORDS = {
   "巴黎":[48.85,2.35],"伦敦":[51.51,-0.13],"柏林":[52.52,13.40],
-  "纽约":[40.71,-74.01],"洛杉矶":[34.05,-118.24],"芝加哥":[41.88,-87.63],
-  "波士顿":[42.36,-71.06],"华盛顿":[38.90,-77.03],"旧金山":[37.77,-122.42],
-  "剑桥":[52.20,0.12],"牛津":[51.75,-1.26],"爱丁堡":[55.95,-3.19],
-  "阿姆斯特丹":[52.37,4.89],"布鲁塞尔":[50.85,4.35],"日内瓦":[46.20,6.14],
-  "苏黎世":[47.38,8.54],"维也纳":[48.21,16.37],"布拉格":[50.08,14.43],
-  "华沙":[52.23,21.01],"斯德哥尔摩":[59.33,18.07],"哥本哈根":[55.68,12.57],
-  "莫斯科":[55.75,37.62],"圣彼得堡":[59.93,30.32],"马德里":[40.42,-3.70],
-  "巴塞罗那":[41.38,2.17],"里斯本":[38.72,-9.14],"罗马":[41.90,12.49],
-  "米兰":[45.46,9.19],"佛罗伦萨":[43.77,11.25],"雅典":[37.97,23.73],
-  "伊斯坦布尔":[41.01,28.95],"开罗":[30.04,31.24],"亚历山大":[31.20,29.92],
+  "纽约":[40.71,-74.01],"芝加哥":[41.88,-87.63],"波士顿":[42.36,-71.06],
+  "剑桥":[52.20,0.12],"牛津":[51.75,-1.26],"阿姆斯特丹":[52.37,4.89],
+  "维也纳":[48.21,16.37],"布拉格":[50.08,14.43],"苏黎世":[47.38,8.54],
+  "日内瓦":[46.20,6.14],"法兰克福":[50.11,8.68],"莫斯科":[55.75,37.62],
+  "马德里":[40.42,-3.70],"罗马":[41.90,12.49],"佛罗伦萨":[43.77,11.25],
+  "雅典":[37.97,23.73],"伊斯坦布尔":[41.01,28.95],"开罗":[30.04,31.24],
   "巴格达":[33.34,44.40],"德黑兰":[35.69,51.42],"耶路撒冷":[31.77,35.22],
   "北京":[39.91,116.39],"上海":[31.23,121.47],"南京":[32.06,118.79],
   "西安":[34.27,108.95],"广州":[23.13,113.26],"成都":[30.57,104.07],
-  "东京":[35.68,139.69],"京都":[35.01,135.77],"大阪":[34.69,135.50],
-  "首尔":[37.57,126.98],"孟买":[19.07,72.87],"德里":[28.61,77.21],
-  "加尔各答":[22.57,88.36],"突尼斯":[36.82,10.17],"开普敦":[-33.92,18.42],
-  "圣保罗":[-23.55,-46.63],"里约热内卢":[-22.91,-43.17],
-  "布宜诺斯艾利斯":[-34.60,-58.38],"墨西哥城":[19.43,-99.13],
-  "悉尼":[-33.87,151.21],"墨尔本":[-37.81,144.96],
-  "法兰克福":[50.11,8.68],"海德堡":[49.40,8.69],"慕尼黑":[48.14,11.58],
-  "哥尼斯堡":[54.71,20.51],"耶拿":[50.93,11.59],"魏玛":[50.98,11.33],
+  "东京":[35.68,139.69],"京都":[35.01,135.77],"首尔":[37.57,126.98],
+  "孟买":[19.07,72.87],"德里":[28.61,77.21],"加尔各答":[22.57,88.36],
+  "圣保罗":[-23.55,-46.63],"布宜诺斯艾利斯":[-34.60,-58.38],
+  "墨西哥城":[19.43,-99.13],"悉尼":[-33.87,151.21],
+  "斯德哥尔摩":[59.33,18.07],"哥本哈根":[55.68,12.57],
+  "海德堡":[49.40,8.69],"慕尼黑":[48.14,11.58],"哥尼斯堡":[54.71,20.51],
 };
 
-// ══════════════════════════════════════════════════════
-//  以下为地图逻辑，无需修改
-// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════
+// 以下为地图逻辑，无需修改
+// ══════════════════════════════════════
 var cityIndex={};
 CITIES.forEach(function(c){cityIndex[c.city]=c;});
-
 var currentYear=2025,showLines=true,showArrows=true,filterType='all',animTimer=null;
 var polylines=[],markers=[];
-
 var TYPE_COLOR={inherit:'#111',influence:'#555',critique:'#999',parallel:'#bbb'};
-var TYPE_DASH ={inherit:null,influence:'6,4',critique:'4,4',parallel:'3,6'};
+var TYPE_DASH={inherit:null,influence:'6,4',critique:'4,4',parallel:'3,6'};
 var TYPE_LABEL={inherit:'直接传承',influence:'思想影响',critique:'批判回应',parallel:'平行发展'};
 
 var map=L.map('map',{zoomControl:true,scrollWheelZoom:true}).setView([35,20],2);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
-  attribution:'© <a href="https://carto.com">CARTO</a> © <a href="https://openstreetmap.org">OSM</a>',
-  maxZoom:18
-}).addTo(map);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:'© CARTO © OSM',maxZoom:18}).addTo(map);
 
 function getVisible(e){return e.filter(function(x){return x.year<=currentYear;});}
 
 function makeMarker(city){
-  var vis=getVisible(city.entries);
-  if(!vis.length)return null;
+  var vis=getVisible(city.entries);if(!vis.length)return null;
   var sz=Math.min(10+vis.length*5,30);
   var icon=L.divIcon({className:'',
     html:'<div style="width:'+sz+'px;height:'+sz+'px;border-radius:50%;background:#111;border:2.5px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;cursor:pointer"><span style="color:#fff;font-size:'+Math.max(8,sz/3.2)+'px;font-weight:500">'+vis.length+'</span></div>',
@@ -360,14 +327,12 @@ function makeMarker(city){
 }
 
 function renderMarkers(){
-  markers.forEach(function(m){try{map.removeLayer(m);}catch(e){}});
-  markers=[];
+  markers.forEach(function(m){try{map.removeLayer(m);}catch(e){}});markers=[];
   CITIES.forEach(function(c){var m=makeMarker(c);if(m)markers.push(m);});
 }
 
 function renderLines(){
-  polylines.forEach(function(p){try{map.removeLayer(p);}catch(e){}});
-  polylines=[];
+  polylines.forEach(function(p){try{map.removeLayer(p);}catch(e){}});polylines=[];
   if(!showLines)return;
   LINKS.filter(function(r){
     if(r.year>currentYear)return false;
@@ -387,20 +352,14 @@ function renderLines(){
     if(showArrows){
       try{
         var angle=Math.atan2(b.lng-a.lng,b.lat-a.lat)*180/Math.PI-90;
-        var ai=L.divIcon({className:'',
-          html:'<div style="width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:9px solid '+color+';opacity:.75;transform:rotate('+angle+'deg)"></div>',
-          iconSize:[10,9],iconAnchor:[5,5]});
-        var am=L.marker([b.lat,b.lng],{icon:ai,interactive:false,zIndexOffset:-100}).addTo(map);
-        polylines.push(am);
+        var ai=L.divIcon({className:'',html:'<div style="width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:9px solid '+color+';opacity:.75;transform:rotate('+angle+'deg)"></div>',iconSize:[10,9],iconAnchor:[5,5]});
+        polylines.push(L.marker([b.lat,b.lng],{icon:ai,interactive:false,zIndexOffset:-100}).addTo(map));
       }catch(e){}
     }
   });
 }
 
-function openSidebar(html){
-  document.getElementById('sidebar-inner').innerHTML=html;
-  document.getElementById('sidebar').classList.add('open');
-}
+function openSidebar(html){document.getElementById('sidebar-inner').innerHTML=html;document.getElementById('sidebar').classList.add('open');}
 function closeSidebar(){document.getElementById('sidebar').classList.remove('open');}
 
 function showLinkPanel(r){
@@ -412,16 +371,8 @@ function showLinkPanel(r){
     '<div class="detail-desc">'+r.desc+'</div>'+
     '<div class="conn-lbl">相关城市</div>'+
     '<div class="conn-list">'+
-      '<div class="conn-item" onclick="showCityPanelByName(\''+r.from+'\')">'+
-        '<span class="conn-arrow">← 起点</span>'+
-        '<div><div class="conn-name">'+r.from+'</div>'+
-        '<div class="conn-sub">'+(a?a.entries.map(function(e){return e.title;}).join('、'):'')+'</div></div>'+
-      '</div>'+
-      '<div class="conn-item" onclick="showCityPanelByName(\''+r.to+'\')">'+
-        '<span class="conn-arrow">→ 终点</span>'+
-        '<div><div class="conn-name">'+r.to+'</div>'+
-        '<div class="conn-sub">'+(b?b.entries.map(function(e){return e.title;}).join('、'):'')+'</div></div>'+
-      '</div>'+
+      '<div class="conn-item" onclick="showCityPanelByName(\''+r.from+'\')"><span class="conn-arrow">← 起点</span><div><div class="conn-name">'+r.from+'</div><div class="conn-sub">'+(a?a.entries.map(function(e){return e.title;}).join('、'):'')+'</div></div></div>'+
+      '<div class="conn-item" onclick="showCityPanelByName(\''+r.to+'\')"><span class="conn-arrow">→ 终点</span><div><div class="conn-name">'+r.to+'</div><div class="conn-sub">'+(b?b.entries.map(function(e){return e.title;}).join('、'):'')+'</div></div></div>'+
     '</div>'
   );
 }
@@ -431,53 +382,38 @@ function showCityPanelByName(n){var c=cityIndex[n];if(c)showCityPanel(c,getVisib
 function showCityPanel(city,vis){
   var entriesHtml=vis.sort(function(a,b){return a.year-b.year;}).map(function(e){
     return '<div class="ecard">'+
-      '<div class="ecard-top"><span class="ecard-title">'+e.title+'</span>'+
-      '<span class="ecard-yr">'+(e.year<0?'前'+Math.abs(e.year)+'年':e.year+'年')+'</span></div>'+
-      '<div class="ecard-person">'+e.person+'</div>'+
-      '<span class="etag">'+e.domain+'</span>'+
+      '<div class="ecard-top"><span class="ecard-title">'+e.title+'</span><span class="ecard-yr">'+(e.year<0?'前'+Math.abs(e.year)+'年':e.year+'年')+'</span></div>'+
+      '<div class="ecard-person">'+e.person+'</div><span class="etag">'+e.domain+'</span>'+
       (e.note?'<div class="enote">'+e.note+'</div>':'')+
       (e.links&&e.links.length?'<div class="elinks">'+e.links.map(function(l){return '<span class="echip">↗ '+l+'</span>';}).join('')+'</div>':'')+
     '</div>';
   }).join('');
   var rel=LINKS.filter(function(r){return(r.from===city.city||r.to===city.city)&&r.year<=currentYear;});
-  var linksHtml=rel.length?(
-    '<div class="section-gap"></div>'+
-    '<div class="conn-lbl">传播关联（'+rel.length+'条）</div>'+
-    '<div class="conn-list">'+rel.map(function(r){
+  var linksHtml=rel.length?'<div class="section-gap"></div><div class="conn-lbl">传播关联（'+rel.length+'条）</div><div class="conn-list">'+
+    rel.map(function(r){
       var dir=r.from===city.city?'→ 输出':'← 来源';
       var other=r.from===city.city?r.to:r.from;
       return '<div class="conn-item" onclick=\'showLinkPanel('+JSON.stringify(r)+')\'>'+
         '<span class="conn-arrow">'+dir+'</span>'+
-        '<div><div class="conn-name">'+r.label+'</div>'+
-        '<div class="conn-sub">'+other+' · '+TYPE_LABEL[r.type]+'</div>'+
-        '<div class="conn-year">'+(r.year<0?'公元前'+Math.abs(r.year):r.year)+'年</div></div>'+
-      '</div>';
-    }).join('')+'</div>'
-  ):'';
-  openSidebar(
-    '<div class="city-title">'+city.city+' · '+vis.length+' 条理论</div>'+
-    '<div class="entries">'+entriesHtml+'</div>'+linksHtml
-  );
+        '<div><div class="conn-name">'+r.label+'</div><div class="conn-sub">'+other+' · '+TYPE_LABEL[r.type]+'</div>'+
+        '<div class="conn-year">'+(r.year<0?'公元前'+Math.abs(r.year):r.year)+'年</div></div></div>';
+    }).join('')+'</div>':'';
+  openSidebar('<div class="city-title">'+city.city+' · '+vis.length+' 条理论</div><div class="entries">'+entriesHtml+'</div>'+linksHtml);
 }
 
 function toggleLines(btn){showLines=!showLines;btn.classList.toggle('on',showLines);renderLines();}
 function toggleArrows(btn){showArrows=!showArrows;btn.classList.toggle('on',showArrows);renderLines();}
-function setFilter(el,type){
-  document.querySelectorAll('.ftag').forEach(function(t){t.classList.remove('on');});
-  el.classList.add('on');filterType=type;renderLines();
-}
+function setFilter(el,type){document.querySelectorAll('.ftag').forEach(function(t){t.classList.remove('on');});el.classList.add('on');filterType=type;renderLines();}
+
 function toggleAnimate(btn){
   if(animTimer){clearInterval(animTimer);animTimer=null;btn.textContent='▶ 演化';btn.classList.remove('on');return;}
   btn.textContent='■ 停止';btn.classList.add('on');
-  var y=-500;currentYear=y;
-  document.getElementById('yearSlider').value=y;
+  var y=-500;currentYear=y;document.getElementById('yearSlider').value=y;
   document.getElementById('yearDisplay').textContent='公元前500年';
   renderMarkers();renderLines();closeSidebar();
   animTimer=setInterval(function(){
-    y+=25;
-    if(y>2025){clearInterval(animTimer);animTimer=null;btn.textContent='▶ 演化';btn.classList.remove('on');return;}
-    currentYear=y;
-    document.getElementById('yearSlider').value=y;
+    y+=25;if(y>2025){clearInterval(animTimer);animTimer=null;btn.textContent='▶ 演化';btn.classList.remove('on');return;}
+    currentYear=y;document.getElementById('yearSlider').value=y;
     document.getElementById('yearDisplay').textContent=y<0?'公元前'+Math.abs(y)+'年':y+'年';
     renderMarkers();renderLines();
   },120);
@@ -499,8 +435,7 @@ function submitEntry(){
   if(!title||!city){showToast('请填写理论名称和城市');return;}
   var entry={
     year:parseInt(document.getElementById('f-year').value)||0,
-    title:title,
-    person:document.getElementById('f-person').value.trim(),
+    title:title,person:document.getElementById('f-person').value.trim(),
     domain:document.getElementById('f-domain').value.trim(),
     note:document.getElementById('f-note').value.trim(),
     links:document.getElementById('f-links').value.split(/[，,]/).map(function(s){return s.trim();}).filter(Boolean)
@@ -513,16 +448,12 @@ function submitEntry(){
     CITIES.push(nc);cityIndex[city]=nc;
   }
   renderMarkers();renderLines();
-  ['f-title','f-person','f-year','f-city','f-domain','f-note','f-when','f-links'].forEach(function(id){
-    var el=document.getElementById(id);if(el)el.value='';
-  });
-  closeAdd();
-  showToast('已添加：'+title+' · '+city);
+  ['f-title','f-person','f-year','f-city','f-domain','f-note','f-when','f-links'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  closeAdd();showToast('已添加：'+title+' · '+city);
 }
 
 function showToast(msg){
-  var t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
+  var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
   setTimeout(function(){t.classList.remove('show');},2500);
 }
 
