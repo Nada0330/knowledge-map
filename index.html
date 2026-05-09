@@ -602,10 +602,10 @@ renderLines();
   q = q.trim().toLowerCase();
   var clearBtn = document.getElementById('searchClear');
   clearBtn.style.display = q ? 'block' : 'none';
-  if(!q){ markers.forEach(function(m){m.setOpacity(1);}); return; }
   markers.forEach(function(m){
     var city = m._city;
     if(!city) return;
+    if(!q){ m.setOpacity(1); m.setZIndexOffset(0); return; }
     var hit = city.city.toLowerCase().includes(q) ||
       city.entries.some(function(e){
         return (e.title||'').toLowerCase().includes(q) ||
@@ -614,7 +614,53 @@ renderLines();
                (e.note||'').toLowerCase().includes(q) ||
                (e.links||[]).some(function(l){return l.toLowerCase().includes(q);});
       });
-    m.setOpacity(hit ? 1 : 0.15);
+    if(hit){
+      m.setOpacity(1);
+      m.setZIndexOffset(1000);
+      var el = m.getElement();
+      if(el){
+        var inner = el.querySelector('div');
+        if(inner){
+          inner.style.transition = 'transform .15s ease';
+          inner.style.transform = 'scale(1.7)';
+          inner.style.background = '#f78166';
+          inner.style.boxShadow = '0 0 0 4px rgba(247,129,102,0.35)';
+          setTimeout(function(){
+            inner.style.transform = 'scale(1.4)';
+          }, 200);
+        }
+      }
+    } else {
+      m.setOpacity(0.15);
+      m.setZIndexOffset(0);
+      var el2 = m.getElement();
+      if(el2){
+        var inner2 = el2.querySelector('div');
+        if(inner2){
+          inner2.style.transform = 'scale(1)';
+          inner2.style.background = '#388bfd';
+          inner2.style.boxShadow = 'none';
+        }
+      }
+    }
+  });
+}
+
+function clearSearch(){
+  document.getElementById('searchInput').value='';
+  document.getElementById('searchClear').style.display='none';
+  markers.forEach(function(m){
+    m.setOpacity(1);
+    m.setZIndexOffset(0);
+    var el = m.getElement();
+    if(el){
+      var inner = el.querySelector('div');
+      if(inner){
+        inner.style.transform = 'scale(1)';
+        inner.style.background = '#388bfd';
+        inner.style.boxShadow = 'none';
+      }
+    }
   });
 }
 
