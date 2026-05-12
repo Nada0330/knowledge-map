@@ -48,14 +48,22 @@ footer{padding:40px;border-top:0.5px solid #21262d;display:flex;justify-content:
 </head>
 <body>
 
-<nav>
+<nav id="navbar">
   <a href="index.html" class="nav-logo">Nada's</a>
-  <div class="nav-links">
-    <a href="index.html">Home</a>
-    <a href="atlas.html">Atlas</a>
-    <a href="notes.html" class="active">Notes</a>
-  </div>
+  <div id="menu-toggle" onclick="toggleMenu()" style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#484f58;cursor:pointer;transition:color .2s">Menu</div>
 </nav>
+
+<div id="menu-overlay" style="display:none;position:fixed;inset:0;background:#0d1117;z-index:200;flex-direction:column;align-items:flex-end;padding:20px 40px">
+  <div style="display:flex;justify-content:space-between;width:100%;align-items:center;margin-bottom:60px">
+    <a href="index.html" style="font-family:'EB Garamond',Georgia,serif;font-size:18px;color:#e6edf3;text-decoration:none">Nada's</a>
+    <span onclick="toggleMenu()" style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#484f58;cursor:pointer">Close</span>
+  </div>
+  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:24px">
+    <a href="index.html" onclick="toggleMenu()" style="font-family:'EB Garamond',Georgia,serif;font-size:42px;color:#e6edf3;text-decoration:none;font-weight:400;transition:color .2s" onmouseover="this.style.color='#484f58'" onmouseout="this.style.color='#e6edf3'">Home</a>
+    <a href="atlas.html" onclick="toggleMenu()" style="font-family:'EB Garamond',Georgia,serif;font-size:42px;color:#e6edf3;text-decoration:none;font-weight:400;transition:color .2s" onmouseover="this.style.color='#484f58'" onmouseout="this.style.color='#e6edf3'">Atlas</a>
+    <a href="notes.html" onclick="toggleMenu()" style="font-family:'EB Garamond',Georgia,serif;font-size:42px;color:#e6edf3;text-decoration:none;font-weight:400;transition:color .2s" onmouseover="this.style.color='#484f58'" onmouseout="this.style.color='#e6edf3'">Notes</a>
+  </div>
+</div>
 
 <div class="page-header">
   <p class="page-eyebrow">Nada's Notes</p>
@@ -151,6 +159,19 @@ function addNote(){
 }
 
 renderNotes();
+  function toggleMenu(){
+  var overlay=document.getElementById('menu-overlay');
+  var toggle=document.getElementById('menu-toggle');
+  var isOpen=overlay.style.display==='flex';
+  overlay.style.display=isOpen?'none':'flex';
+  toggle.textContent=isOpen?'Menu':'Close';
+}
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){
+    document.getElementById('menu-overlay').style.display='none';
+    document.getElementById('menu-toggle').textContent='Menu';
+  }
+});
 </script>
 </body>
 </html>
