@@ -7,103 +7,134 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#e6edf3;font-size:13px}
+#landing{position:fixed;inset:0;background:#0d1117;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem}
+#landing.hidden{display:none}
+.landing-eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#484f58;margin-bottom:2rem}
+.landing-title{font-family:'EB Garamond',Georgia,serif;font-size:44px;font-weight:400;color:#e6edf3;line-height:1.2;margin-bottom:1.2rem;max-width:520px}
+.landing-sub{font-size:13px;color:#7d8590;line-height:1.9;max-width:380px;margin-bottom:2.5rem}
+.landing-enter{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#e6edf3;border-bottom:0.5px solid #484f58;padding-bottom:4px;cursor:pointer;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit}
+.landing-enter:hover{border-bottom-color:#e6edf3}
+.landing-stats{display:flex;gap:3rem;margin-top:3rem}
+.stat-num{font-family:'EB Garamond',Georgia,serif;font-size:26px;color:#e6edf3;display:block}
+.stat-lbl{font-size:10px;color:#484f58;letter-spacing:.1em;text-transform:uppercase;margin-top:3px;display:block}
 #app{display:flex;flex-direction:column;height:100vh;overflow:hidden}
-#topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:0.5px solid #30363d;flex-shrink:0;background:#161b22}
-.site-title{font-size:14px;font-weight:500;letter-spacing:.05em;color:#e6edf3}
-.site-sub{font-size:11px;color:#7d8590;margin-left:10px}
+#topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:0.5px solid #21262d;flex-shrink:0;background:#161b22;gap:16px}
+.topbar-brand{display:flex;flex-direction:column;gap:2px;flex-shrink:0}
+.site-title{font-family:'EB Garamond',Georgia,serif;font-size:20px;font-weight:400;color:#e6edf3;letter-spacing:.02em}
+.site-sub{font-size:10px;color:#484f58;letter-spacing:.1em;text-transform:uppercase}
+#searchbox{display:flex;align-items:center;gap:6px;background:#0d1117;border:0.5px solid #30363d;border-radius:4px;padding:5px 10px;flex:0 0 220px}
+#searchbox input{background:transparent;border:none;outline:none;font-size:12px;color:#e6edf3;width:100%;font-family:inherit}
+#searchbox input::placeholder{color:#484f58}
+#searchClear{font-size:14px;color:#484f58;cursor:pointer;display:none}
 .toolbar{display:flex;gap:5px}
-.tbtn{font-size:11px;padding:5px 11px;border:0.5px solid #30363d;border-radius:6px;background:transparent;color:#7d8590;cursor:pointer;font-family:inherit;transition:all .15s}
+.tbtn{font-size:11px;padding:5px 11px;border:0.5px solid #30363d;border-radius:4px;background:transparent;color:#7d8590;cursor:pointer;font-family:inherit;letter-spacing:.03em;transition:all .15s}
 .tbtn:hover{background:#21262d;border-color:#8b949e;color:#e6edf3}
-.tbtn.on{background:#388bfd;color:#fff;border-color:#388bfd}
+.tbtn.on{background:#e6edf3;color:#0d1117;border-color:#e6edf3}
 #map-wrap{position:relative;flex:1;min-height:0}
 #map{width:100%;height:100%}
-#timebar{padding:8px 16px 7px;border-top:0.5px solid #30363d;border-bottom:0.5px solid #30363d;background:#161b22;flex-shrink:0}
+#timebar{padding:8px 20px 7px;border-top:0.5px solid #21262d;border-bottom:0.5px solid #21262d;background:#161b22;flex-shrink:0}
 .time-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
-.time-lbl{font-size:10px;color:#7d8590;text-transform:uppercase;letter-spacing:.07em}
-.time-val{font-size:15px;font-weight:500;color:#e6edf3}
-#yearSlider{width:100%;cursor:pointer;accent-color:#388bfd}
+.time-lbl{font-size:10px;color:#484f58;text-transform:uppercase;letter-spacing:.1em}
+.time-val{font-family:'EB Garamond',Georgia,serif;font-size:16px;color:#e6edf3}
+#yearSlider{width:100%;cursor:pointer;accent-color:#e6edf3}
 .era-row{display:flex;justify-content:space-between;margin-top:3px}
-.era-m{font-size:9px;color:#484f58}
-#filter-bar{display:flex;gap:5px;padding:7px 16px;border-bottom:0.5px solid #30363d;flex-wrap:wrap;align-items:center;flex-shrink:0;background:#161b22}
-.filter-lbl{font-size:10px;color:#7d8590;text-transform:uppercase;letter-spacing:.06em;margin-right:2px}
-.ftag{font-size:11px;padding:3px 10px;border:0.5px solid #30363d;border-radius:20px;color:#7d8590;cursor:pointer;transition:all .15s}
-.ftag:hover{border-color:#8b949e;color:#e6edf3}
-.ftag.on{border-color:#388bfd;color:#388bfd;background:#1c2d41;font-weight:500}
-#legend{padding:7px 16px;border-bottom:0.5px solid #30363d;display:flex;gap:18px;flex-wrap:wrap;align-items:center;flex-shrink:0;background:#161b22}
-.leg-row{display:flex;align-items:center;gap:6px;font-size:10px;color:#7d8590}
-.leg-line{width:22px;height:2px}
+.era-m{font-size:9px;color:#30363d;letter-spacing:.06em}
+#filter-bar{display:flex;gap:5px;padding:7px 20px;border-bottom:0.5px solid #21262d;flex-wrap:wrap;align-items:center;flex-shrink:0;background:#161b22}
+.filter-lbl{font-size:10px;color:#484f58;text-transform:uppercase;letter-spacing:.08em;margin-right:2px}
+.ftag{font-size:11px;padding:3px 10px;border:0.5px solid #21262d;border-radius:2px;color:#484f58;cursor:pointer;transition:all .15s;letter-spacing:.03em}
+.ftag:hover{border-color:#484f58;color:#8b949e}
+.ftag.on{border-color:#e6edf3;color:#e6edf3;font-weight:500}
+#legend{padding:6px 20px;border-bottom:0.5px solid #21262d;display:flex;gap:18px;flex-wrap:wrap;align-items:center;flex-shrink:0;background:#161b22}
+.leg-row{display:flex;align-items:center;gap:6px;font-size:10px;color:#484f58;letter-spacing:.04em}
+.leg-line{width:22px;height:1.5px}
 .leg-line.t1{background:#e6edf3}
 .leg-line.t2{background:repeating-linear-gradient(90deg,#8b949e 0,#8b949e 5px,transparent 5px,transparent 9px)}
 .leg-line.t3{background:repeating-linear-gradient(90deg,#484f58 0,#484f58 4px,transparent 4px,transparent 7px)}
 .leg-line.t4{background:repeating-linear-gradient(90deg,#30363d 0,#30363d 3px,transparent 3px,transparent 6px)}
-#sidebar{position:absolute;top:0;right:0;width:320px;height:100%;background:#161b22;border-left:0.5px solid #30363d;z-index:1000;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s ease;overflow:hidden}
+#sidebar{position:absolute;top:0;right:0;width:300px;height:100%;background:#161b22;border-left:0.5px solid #21262d;z-index:1000;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s ease;overflow:hidden}
 #sidebar.open{transform:translateX(0)}
-#sidebar-inner{flex:1;overflow-y:auto;padding:14px 16px}
-#sidebar-close{position:absolute;top:10px;right:12px;font-size:20px;color:#484f58;cursor:pointer;z-index:10;line-height:1;padding:2px 6px;background:#161b22}
-#sidebar-close:hover{color:#e6edf3}
-.detail-type{font-size:10px;padding:2px 8px;border-radius:4px;border:0.5px solid #30363d;color:#7d8590;margin-bottom:5px;display:inline-block}
-.detail-title{font-size:16px;font-weight:500;margin-bottom:3px;line-height:1.3;padding-right:28px;color:#e6edf3}
-.detail-meta{font-size:11px;color:#7d8590;margin-bottom:12px}
-.detail-desc{font-size:12px;color:#8b949e;line-height:1.75;padding:10px 0;border-top:0.5px solid #30363d;border-bottom:0.5px solid #30363d;margin-bottom:12px}
-.conn-lbl{font-size:10px;color:#484f58;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
-.conn-list{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
-.conn-item{display:flex;align-items:flex-start;gap:10px;padding:9px 11px;border:0.5px solid #30363d;border-radius:7px;cursor:pointer;transition:border-color .15s;background:#0d1117}
-.conn-item:hover{border-color:#388bfd}
-.conn-arrow{font-size:11px;color:#484f58;padding-top:1px;white-space:nowrap;min-width:36px}
-.conn-name{font-size:12px;font-weight:500;color:#e6edf3}
-.conn-sub{font-size:11px;color:#7d8590;line-height:1.5;margin-top:2px}
-.conn-year{font-size:10px;color:#484f58;margin-top:2px}
-.city-title{font-size:11px;color:#484f58;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;padding-right:28px}
-.entries{display:flex;flex-direction:column;gap:8px}
-.ecard{border:0.5px solid #30363d;border-radius:8px;padding:10px 12px;background:#0d1117}
-.ecard-top{display:flex;justify-content:space-between;align-items:flex-start;gap:6px}
-.ecard-title{font-size:13px;font-weight:500;line-height:1.3;color:#e6edf3}
-.ecard-yr{font-size:10px;color:#484f58;white-space:nowrap;padding-top:2px}
-.ecard-person{font-size:11px;color:#7d8590;margin:3px 0 5px}
-.etag{font-size:10px;padding:2px 7px;border:0.5px solid #30363d;border-radius:4px;color:#7d8590}
-.enote{font-size:11px;color:#8b949e;line-height:1.65;border-left:2px solid #388bfd;padding-left:8px;margin-top:6px}
-.elinks{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
-.echip{font-size:10px;padding:2px 8px;border:0.5px solid #30363d;border-radius:20px;color:#7d8590}
-.section-gap{height:14px}
-#add-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:2000;align-items:center;justify-content:center}
+#sidebar-inner{flex:1;overflow-y:auto;padding:24px 22px}
+#sidebar-inner::-webkit-scrollbar{width:3px}
+#sidebar-inner::-webkit-scrollbar-track{background:transparent}
+#sidebar-inner::-webkit-scrollbar-thumb{background:#30363d}
+#sidebar-close{position:absolute;top:14px;right:16px;font-size:18px;color:#30363d;cursor:pointer;z-index:10;background:#161b22;padding:2px 5px}
+#sidebar-close:hover{color:#8b949e}
+.detail-type{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#484f58;margin-bottom:6px;display:block}
+.detail-title{font-family:'EB Garamond',Georgia,serif;font-size:22px;font-weight:400;margin-bottom:4px;line-height:1.25;padding-right:24px;color:#e6edf3}
+.detail-meta{font-size:11px;color:#484f58;margin-bottom:16px;letter-spacing:.04em}
+.detail-desc{font-size:12px;color:#8b949e;line-height:1.8;padding:14px 0;border-top:0.5px solid #21262d;border-bottom:0.5px solid #21262d;margin-bottom:16px;font-style:italic}
+.conn-lbl{font-size:10px;color:#30363d;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+.conn-list{display:flex;flex-direction:column;gap:5px;margin-bottom:16px}
+.conn-item{display:flex;align-items:flex-start;gap:10px;padding:9px 11px;border:0.5px solid #21262d;border-radius:3px;cursor:pointer;transition:border-color .15s}
+.conn-item:hover{border-color:#484f58}
+.conn-arrow{font-size:11px;color:#30363d;padding-top:1px;white-space:nowrap;min-width:36px}
+.conn-name{font-size:12px;color:#e6edf3}
+.conn-sub{font-size:11px;color:#484f58;line-height:1.5;margin-top:2px}
+.conn-year{font-size:10px;color:#30363d;margin-top:2px}
+.city-title{font-size:10px;color:#30363d;text-transform:uppercase;letter-spacing:.12em;margin-bottom:16px;padding-right:24px}
+.entries{display:flex;flex-direction:column;gap:0}
+.ecard{padding:14px 0;border-bottom:0.5px solid #21262d}
+.ecard:last-child{border-bottom:none}
+.ecard-top{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-bottom:2px}
+.ecard-title{font-family:'EB Garamond',Georgia,serif;font-size:16px;font-weight:400;line-height:1.3;color:#e6edf3}
+.ecard-yr{font-size:10px;color:#30363d;white-space:nowrap;padding-top:3px;letter-spacing:.04em}
+.ecard-person{font-size:11px;color:#484f58;margin:3px 0 6px;letter-spacing:.02em}
+.etag{font-size:10px;padding:1px 7px;border:0.5px solid #21262d;border-radius:2px;color:#484f58;letter-spacing:.04em}
+.enote{font-size:12px;color:#8b949e;line-height:1.8;padding-left:10px;border-left:1.5px solid #30363d;margin-top:8px;font-style:italic}
+.elinks{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+.echip{font-size:10px;padding:2px 8px;border:0.5px solid #21262d;border-radius:2px;color:#484f58;letter-spacing:.03em}
+.section-gap{height:16px}
+#add-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;align-items:center;justify-content:center}
 #add-modal.open{display:flex}
-#add-box{background:#161b22;border:0.5px solid #30363d;border-radius:12px;padding:20px 22px;width:440px;max-width:95vw;max-height:90vh;overflow-y:auto}
-.modal-title{font-size:15px;font-weight:500;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;color:#e6edf3}
-.modal-close{font-size:20px;color:#484f58;cursor:pointer}
-.modal-close:hover{color:#e6edf3}
+#add-box{background:#161b22;border:0.5px solid #30363d;border-radius:6px;padding:24px 26px;width:440px;max-width:95vw;max-height:90vh;overflow-y:auto}
+.modal-title{font-family:'EB Garamond',Georgia,serif;font-size:20px;font-weight:400;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;color:#e6edf3}
+.modal-close{font-size:20px;color:#30363d;cursor:pointer;font-family:sans-serif}
+.modal-close:hover{color:#8b949e}
 .form-row{margin-bottom:10px}
-.form-lbl{font-size:11px;color:#7d8590;margin-bottom:4px;display:block}
-.form-input{width:100%;border:0.5px solid #30363d;border-radius:6px;padding:8px 10px;font-size:13px;font-family:inherit;color:#e6edf3;background:#0d1117;outline:none}
-.form-input:focus{border-color:#388bfd}
-textarea.form-input{resize:vertical;min-height:80px;line-height:1.6}
+.form-lbl{font-size:10px;color:#484f58;margin-bottom:5px;display:block;letter-spacing:.08em;text-transform:uppercase}
+.form-input{width:100%;border:0.5px solid #30363d;border-radius:3px;padding:8px 10px;font-size:13px;font-family:inherit;color:#e6edf3;background:#0d1117;outline:none}
+.form-input:focus{border-color:#8b949e}
+textarea.form-input{resize:vertical;min-height:80px;line-height:1.7}
 .form-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
-.submit-btn{width:100%;padding:10px;background:#238636;color:#fff;border:none;border-radius:7px;font-size:13px;font-family:inherit;cursor:pointer;font-weight:500;margin-top:4px}
-.submit-btn:hover{background:#2ea043}
-#toast{display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#388bfd;color:#fff;font-size:12px;padding:9px 18px;border-radius:20px;z-index:3000;white-space:nowrap}
+.submit-btn{width:100%;padding:10px;background:#e6edf3;color:#0d1117;border:none;border-radius:3px;font-size:12px;font-family:inherit;cursor:pointer;font-weight:500;margin-top:6px;letter-spacing:.06em;text-transform:uppercase}
+.submit-btn:hover{background:#fff}
+#toast{display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#e6edf3;color:#0d1117;font-size:11px;padding:9px 18px;border-radius:2px;z-index:3000;white-space:nowrap;letter-spacing:.06em}
 #toast.show{display:block}
 </style>
 </head>
 <body>
+  <div id="landing">
+  <p class="landing-eyebrow">Personal Knowledge Atlas</p>
+  <h1 class="landing-title">Where ideas were born, and where they traveled</h1>
+  <p class="landing-sub">A map of intellectual history — tracing theories, thinkers, and the connections between them across time and geography.</p>
+  <button class="landing-enter" onclick="enterMap()">Enter the Map →</button>
+  <div class="landing-stats">
+    <div><span class="stat-num" id="stat-cities">—</span><span class="stat-lbl">Cities</span></div>
+    <div><span class="stat-num" id="stat-theories">—</span><span class="stat-lbl">Theories</span></div>
+    <div><span class="stat-num" id="stat-links">—</span><span class="stat-lbl">Connections</span></div>
+  </div>
+</div>
 <div id="app">
 <div id="topbar">
-  <div>
+  <div class="topbar-brand">
     <span class="site-title">Nada's</span>
     <span class="site-sub">思想传播 · 地理 · 时间</span>
   </div>
-  <div id="searchbox" style="display:flex;align-items:center;gap:6px;background:#0d1117;border:0.5px solid #30363d;border-radius:6px;padding:4px 10px;flex:0 0 220px">
+  <div id="searchbox">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#484f58" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <input id="searchInput" type="text" placeholder="搜索理论、人物、城市..." oninput="doSearch(this.value)" style="background:transparent;border:none;outline:none;font-size:12px;color:#e6edf3;width:100%;font-family:inherit"/>
-    <span id="searchClear" onclick="clearSearch()" style="font-size:14px;color:#484f58;cursor:pointer;display:none">×</span>
+    <input id="searchInput" type="text" placeholder="搜索理论、人物、城市..." oninput="doSearch(this.value)"/>
+    <span id="searchClear" onclick="clearSearch()">×</span>
   </div>
   <div class="toolbar">
-      <button class="tbtn on" id="btn-lines" onclick="toggleLines(this)">传播路径</button>
-      <button class="tbtn on" id="btn-arrows" onclick="toggleArrows(this)">方向箭头</button>
-      <button class="tbtn" id="btn-animate" onclick="toggleAnimate(this)">▶ 演化</button>
-      <button class="tbtn" onclick="openAdd()">＋ 添加</button>
-    </div>
+    <button class="tbtn on" id="btn-lines" onclick="toggleLines(this)">传播路径</button>
+    <button class="tbtn on" id="btn-arrows" onclick="toggleArrows(this)">方向箭头</button>
+    <button class="tbtn" id="btn-animate" onclick="toggleAnimate(this)">▶ 演化</button>
+    <button class="tbtn" onclick="openAdd()">＋ 添加</button>
   </div>
+</div>
 
   <div id="map-wrap">
     <div id="map"></div>
@@ -750,6 +781,12 @@ function clearSearch(){
   document.getElementById('searchClear').style.display='none';
   markers.forEach(function(m){m.setOpacity(1);});
 }
+  function enterMap(){
+  document.getElementById('landing').classList.add('hidden');
+}
+document.getElementById('stat-cities').textContent = CITIES.length;
+document.getElementById('stat-theories').textContent = CITIES.reduce(function(s,c){return s+c.entries.length;},0);
+document.getElementById('stat-links').textContent = LINKS.length;
 </script>
 </body>
 </html>
