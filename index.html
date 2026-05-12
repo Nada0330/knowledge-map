@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nada's</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#e6edf3;min-height:100vh}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:18px 40px;border-bottom:0.5px solid transparent;transition:border-color .3s,background .3s}
+nav.scrolled{border-bottom-color:#21262d;background:#0d1117}
+.nav-logo{font-family:'EB Garamond',Georgia,serif;font-size:18px;color:#e6edf3;text-decoration:none;letter-spacing:.02em}
+.nav-links{display:flex;gap:32px;align-items:center}
+.nav-links a{font-size:11px;color:#484f58;text-decoration:none;letter-spacing:.12em;text-transform:uppercase;transition:color .2s}
+.nav-links a:hover{color:#e6edf3}
+.nav-links a.active{color:#e6edf3}
+section.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 2rem}
+.hero-eyebrow{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#484f58;margin-bottom:2rem}
+.hero-title{font-family:'EB Garamond',Georgia,serif;font-size:clamp(36px,6vw,64px);font-weight:400;color:#e6edf3;line-height:1.15;margin-bottom:1.4rem;max-width:640px}
+.hero-sub{font-size:14px;color:#7d8590;line-height:1.9;max-width:400px;margin-bottom:3rem}
+.hero-cta{display:flex;gap:16px;align-items:center}
+.btn-primary{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#0d1117;background:#e6edf3;padding:10px 24px;text-decoration:none;border-radius:2px;transition:background .2s}
+.btn-primary:hover{background:#fff}
+.btn-ghost{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#484f58;text-decoration:none;border-bottom:0.5px solid #30363d;padding-bottom:3px;transition:all .2s}
+.btn-ghost:hover{color:#e6edf3;border-bottom-color:#e6edf3}
+.hero-scroll{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);font-size:10px;color:#30363d;letter-spacing:.12em;text-transform:uppercase}
+section.stats{padding:80px 40px;border-top:0.5px solid #21262d;border-bottom:0.5px solid #21262d;display:flex;justify-content:center;gap:80px}
+.stat-item{text-align:center}
+.stat-n{font-family:'EB Garamond',Georgia,serif;font-size:36px;color:#e6edf3;display:block;margin-bottom:6px}
+.stat-l{font-size:10px;color:#484f58;letter-spacing:.14em;text-transform:uppercase}
+section.pages{padding:100px 40px;max-width:900px;margin:0 auto}
+.pages-eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#484f58;margin-bottom:3rem}
+.page-cards{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#21262d}
+.page-card{background:#0d1117;padding:48px 40px;text-decoration:none;transition:background .2s;display:block}
+.page-card:hover{background:#161b22}
+.page-card-eyebrow{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#484f58;margin-bottom:16px}
+.page-card-title{font-family:'EB Garamond',Georgia,serif;font-size:26px;color:#e6edf3;margin-bottom:12px;font-weight:400;line-height:1.2}
+.page-card-desc{font-size:12px;color:#7d8590;line-height:1.8;margin-bottom:20px}
+.page-card-arrow{font-size:11px;color:#484f58;letter-spacing:.1em;text-transform:uppercase}
+section.about{padding:100px 40px;max-width:640px;margin:0 auto;text-align:center}
+.about-title{font-family:'EB Garamond',Georgia,serif;font-size:28px;color:#e6edf3;margin-bottom:16px;font-weight:400}
+.about-text{font-size:13px;color:#7d8590;line-height:2;margin-bottom:32px}
+footer{padding:40px;border-top:0.5px solid #21262d;display:flex;justify-content:space-between;align-items:center}
+.footer-logo{font-family:'EB Garamond',Georgia,serif;font-size:16px;color:#484f58}
+.footer-note{font-size:11px;color:#30363d;letter-spacing:.08em}
+</style>
+</head>
+<body>
+
+<nav id="navbar">
+  <a href="index.html" class="nav-logo">Nada's</a>
+  <div class="nav-links">
+    <a href="index.html" class="active">Home</a>
+    <a href="atlas.html">Atlas</a>
+    <a href="notes.html">Notes</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <p class="hero-eyebrow">A mind in progress</p>
+  <h1 class="hero-title">Collecting ideas. Mapping thought. Writing through confusion.</h1>
+  <p class="hero-sub">A personal archive of theories, reflections, and half-formed ideas gathered during years of reading.</p>
+  <div class="hero-cta">
+    <a href="atlas.html" class="btn-primary">Explore the Atlas</a>
+    <a href="notes.html" class="btn-ghost">Read the Notes →</a>
+  </div>
+  <p class="hero-scroll">↓ scroll</p>
+</section>
+
+<section class="stats">
+  <div class="stat-item"><span class="stat-n">18</span><span class="stat-l">Cities</span></div>
+  <div class="stat-item"><span class="stat-n">60+</span><span class="stat-l">Theories</span></div>
+  <div class="stat-item"><span class="stat-n">25</span><span class="stat-l">Connections</span></div>
+</section>
+
+<section class="pages">
+  <p class="pages-eyebrow">What's inside</p>
+  <div class="page-cards">
+    <a href="atlas.html" class="page-card">
+      <p class="page-card-eyebrow">Nada's Atlas</p>
+      <h2 class="page-card-title">Where ideas were born and where they traveled</h2>
+      <p class="page-card-desc">An interactive map tracing the geography and timeline of intellectual history — from ancient Athens to contemporary New York.</p>
+      <span class="page-card-arrow">Enter Atlas →</span>
+    </a>
+    <a href="notes.html" class="page-card">
+      <p class="page-card-eyebrow">Nada's Notes</p>
+      <h2 class="page-card-title">Scattered thoughts, written down</h2>
+      <p class="page-card-desc">Personal essays, diary entries, and half-finished ideas. Not meant to be polished. Meant to be honest.</p>
+      <span class="page-card-arrow">Read Notes →</span>
+    </a>
+  </div>
+</section>
+
+<section class="about">
+  <h2 class="about-title">About this place</h2>
+  <p class="about-text">This is a personal archive built during years of reading across philosophy, sociology, linguistics, and natural science. It started as a note-taking habit and became a way of thinking.</p>
+</section>
+
+<footer>
+  <span class="footer-logo">Nada's</span>
+  <span class="footer-note">A personal knowledge archive</span>
+</footer>
+
+<script>
+window.addEventListener('scroll',function(){
+  var nav=document.getElementById('navbar');
+  nav.classList.toggle('scrolled',window.scrollY>40);
+});
+</script>
+</body>
+</html>
