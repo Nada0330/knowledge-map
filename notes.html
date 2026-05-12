@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nada's Notes</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#e6edf3;min-height:100vh}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:18px 40px;border-bottom:0.5px solid #21262d;background:#0d1117}
+.nav-logo{font-family:'EB Garamond',Georgia,serif;font-size:18px;color:#e6edf3;text-decoration:none}
+.nav-links{display:flex;gap:32px}
+.nav-links a{font-size:11px;color:#484f58;text-decoration:none;letter-spacing:.12em;text-transform:uppercase;transition:color .2s}
+.nav-links a:hover,.nav-links a.active{color:#e6edf3}
+.page-header{padding:120px 40px 60px;max-width:680px;margin:0 auto;border-bottom:0.5px solid #21262d}
+.page-eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#484f58;margin-bottom:16px}
+.page-title{font-family:'EB Garamond',Georgia,serif;font-size:42px;font-weight:400;color:#e6edf3;line-height:1.2;margin-bottom:14px}
+.page-desc{font-size:13px;color:#7d8590;line-height:1.9}
+.notes-list{max-width:680px;margin:0 auto;padding:0 40px}
+.note-item{padding:40px 0;border-bottom:0.5px solid #21262d;cursor:pointer}
+.note-item:hover .note-title{color:#e6edf3}
+.note-meta{display:flex;gap:16px;align-items:center;margin-bottom:12px}
+.note-date{font-size:11px;color:#484f58;letter-spacing:.08em}
+.note-tag{font-size:10px;padding:2px 8px;border:0.5px solid #21262d;border-radius:2px;color:#484f58;letter-spacing:.06em;text-transform:uppercase}
+.note-title{font-family:'EB Garamond',Georgia,serif;font-size:22px;color:#8b949e;margin-bottom:10px;font-weight:400;line-height:1.3;transition:color .2s}
+.note-preview{font-size:13px;color:#484f58;line-height:1.8;font-style:italic}
+.note-expanded{display:none;margin-top:20px;padding-top:20px;border-top:0.5px solid #21262d}
+.note-expanded.open{display:block}
+.note-body{font-size:14px;color:#8b949e;line-height:2;max-width:600px}
+.note-body p{margin-bottom:1.2em}
+.write-section{max-width:680px;margin:0 auto;padding:60px 40px;border-top:0.5px solid #21262d}
+.write-eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#484f58;margin-bottom:20px}
+.write-form{display:flex;flex-direction:column;gap:12px}
+.write-input{background:#161b22;border:0.5px solid #30363d;border-radius:3px;padding:10px 14px;font-size:13px;font-family:inherit;color:#e6edf3;outline:none;width:100%}
+.write-input:focus{border-color:#484f58}
+.write-textarea{background:#161b22;border:0.5px solid #30363d;border-radius:3px;padding:12px 14px;font-size:13px;font-family:'EB Garamond',Georgia,serif;color:#e6edf3;outline:none;width:100%;min-height:160px;resize:vertical;line-height:1.8}
+.write-textarea:focus{border-color:#484f58}
+.write-row{display:flex;gap:10px}
+.write-select{background:#161b22;border:0.5px solid #30363d;border-radius:3px;padding:10px 14px;font-size:12px;font-family:inherit;color:#7d8590;outline:none;flex:1}
+.write-btn{padding:10px 24px;background:#e6edf3;color:#0d1117;border:none;border-radius:2px;font-size:11px;font-family:inherit;cursor:pointer;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.write-btn:hover{background:#fff}
+footer{padding:40px;border-top:0.5px solid #21262d;display:flex;justify-content:space-between;align-items:center;margin-top:40px}
+.footer-logo{font-family:'EB Garamond',Georgia,serif;font-size:16px;color:#484f58}
+.footer-note{font-size:11px;color:#30363d;letter-spacing:.08em}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">Nada's</a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="atlas.html">Atlas</a>
+    <a href="notes.html" class="active">Notes</a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <p class="page-eyebrow">Nada's Notes</p>
+  <h1 class="page-title">Scattered thoughts, written down</h1>
+  <p class="page-desc">Not meant to be polished. Meant to be honest. A place for ideas that don't quite fit anywhere else.</p>
+</div>
+
+<div class="notes-list" id="notesList"></div>
+
+<div class="write-section">
+  <p class="write-eyebrow">Add a note</p>
+  <div class="write-form">
+    <input class="write-input" id="w-title" placeholder="Title"/>
+    <div class="write-row">
+      <input class="write-input" id="w-date" placeholder="Date — e.g. May 2026" style="flex:1"/>
+      <select class="write-select" id="w-tag">
+        <option value="thought">Thought</option>
+        <option value="diary">Diary</option>
+        <option value="quote">Quote</option>
+        <option value="question">Question</option>
+        <option value="observation">Observation</option>
+      </select>
+    </div>
+    <textarea class="write-textarea" id="w-body" placeholder="Write something..."></textarea>
+    <div style="display:flex;justify-content:flex-end">
+      <button class="write-btn" onclick="addNote()">Save Note</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span class="footer-logo">Nada's</span>
+  <span class="footer-note">A personal knowledge archive</span>
+</footer>
+
+<script>
+var NOTES = [
+  {id:1,date:"April 2026",tag:"thought",title:"On the difference between knowing and understanding",
+   preview:"There are things I can explain perfectly and still not understand. And things I understand completely but cannot explain at all.",
+   body:"There are things I can explain perfectly and still not understand. And things I understand completely but cannot explain at all.\n\nI keep thinking about Foucault's point that knowledge is produced, not discovered. If that's true, then what does it mean to 'understand' something? Is understanding just a more intimate kind of knowing? Or is it something that happens in the body, not the mind — something closer to what Mauss called body techniques?\n\nMaybe understanding is what happens when knowledge stops feeling like information and starts feeling like instinct."},
+  {id:2,date:"March 2026",tag:"question",title:"What does it mean to think in a second language?",
+   preview:"My thoughts in Chinese feel different from my thoughts in English. Not translated — genuinely different.",
+   body:"My thoughts in Chinese feel different from my thoughts in English. Not translated — genuinely different.\n\nIn Chinese I think in images and relationships. In English I think in arguments and structures. Is this because of the language, or because of what I learned in each language?\n\nSapir-Whorf hypothesis says language shapes thought. But I'm not sure it's that simple. It might be that different languages give me access to different parts of myself."},
+  {id:3,date:"February 2026",tag:"observation",title:"Everyone is performing coherence",
+   preview:"Nobody is as consistent as they appear. We edit our past selves constantly to make the story make sense.",
+   body:"Nobody is as consistent as they appear. We edit our past selves constantly to make the story make sense.\n\nI noticed this when I tried to explain why I got interested in philosophy. Every time I tell the story, I select different moments, different books, different conversations. The story changes depending on who's listening.\n\nMaybe this is what Arendt meant by natality — we are always beginning again, and the story we tell about ourselves is itself a kind of action."},
+];
+
+var expanded = null;
+
+function renderNotes(){
+  var list = document.getElementById('notesList');
+  list.innerHTML = NOTES.map(function(n){
+    return '<div class="note-item" onclick="toggleNote('+n.id+')">'+
+      '<div class="note-meta">'+
+        '<span class="note-date">'+n.date+'</span>'+
+        '<span class="note-tag">'+n.tag+'</span>'+
+      '</div>'+
+      '<div class="note-title">'+n.title+'</div>'+
+      '<div class="note-preview">'+n.preview+'</div>'+
+      '<div class="note-expanded" id="note-'+n.id+'">'+
+        '<div class="note-body">'+n.body.split('\n\n').map(function(p){return '<p>'+p+'</p>';}).join('')+'</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function toggleNote(id){
+  var el = document.getElementById('note-'+id);
+  if(!el) return;
+  var isOpen = el.classList.contains('open');
+  document.querySelectorAll('.note-expanded').forEach(function(e){e.classList.remove('open');});
+  if(!isOpen) el.classList.add('open');
+}
+
+function addNote(){
+  var title = document.getElementById('w-title').value.trim();
+  var body = document.getElementById('w-body').value.trim();
+  if(!title||!body) return;
+  var note = {
+    id: Date.now(),
+    date: document.getElementById('w-date').value.trim() || 'Today',
+    tag: document.getElementById('w-tag').value,
+    title: title,
+    preview: body.substring(0,100)+'...',
+    body: body
+  };
+  NOTES.unshift(note);
+  renderNotes();
+  document.getElementById('w-title').value='';
+  document.getElementById('w-date').value='';
+  document.getElementById('w-body').value='';
+}
+
+renderNotes();
+</script>
+</body>
+</html>
