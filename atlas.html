@@ -203,6 +203,7 @@ textarea.form-input{resize:vertical;min-height:80px;line-height:1.7}
 // 公元前年份用负数，如公元前380年写 -380
 // ══════════════════════════════════════
 
+  var savedCities = localStorage.getItem('nada-cities');
 var CITIES = [
   {city:"雅典",lat:37.97,lng:23.73,entries:[
     {year:-600,title:"萨福诗篇·女性之爱",person:"萨福",domain:"文学/性别研究",
@@ -413,7 +414,19 @@ var CITIES = [
      links:["海德格尔存在主义","雅斯贝尔斯","流亡与思想","平庸之恶"]},
   ]},
 ];
+  if(savedCities){
+  var extra = JSON.parse(savedCities);
+  extra.forEach(function(c){
+    var existing = CITIES.find(function(x){return x.city===c.city;});
+    if(existing){
+      c.entries.forEach(function(e){existing.entries.push(e);});
+    } else {
+      CITIES.push(c);
+    }
+  });
+}
 var LINKS = [
+  var savedLinks = localStorage.getItem('nada-links');
   {from:"雅典",to:"柏林",type:"inherit",year:1807,
    label:"柏拉图→黑格尔",
    desc:"黑格尔辩证法直接继承柏拉图的理念论，将其历史化——绝对精神在历史中展开自身，呼应了柏拉图理念世界的结构，但加入了时间与运动的维度。"},
@@ -524,6 +537,9 @@ var LINKS = [
  desc:"Hayakawa的语义环境理论与洛克对语言滥用的批判形成跨越两百年的呼应：洛克批判经院哲学用晦涩掩盖空洞，Hayakawa则系统分析了符号与所指混淆的社会机制。两者都在追问：语言何时是认识的工具，何时是认识的障碍。"},
 ];
 
+  if(savedLinks){
+  JSON.parse(savedLinks).forEach(function(l){LINKS.push(l);});
+}
 var CITY_COORDS = {
   "巴黎":[48.85,2.35],"伦敦":[51.51,-0.13],"柏林":[52.52,13.40],
   "纽约":[40.71,-74.01],"芝加哥":[41.88,-87.63],"波士顿":[42.36,-71.06],
@@ -695,6 +711,14 @@ function submitEntry(){
   }
   renderMarkers();renderLines();
   ['f-title','f-person','f-year','f-city','f-domain','f-note','f-when','f-links'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  var saved=JSON.parse(localStorage.getItem('nada-cities')||'[]');
+var savedCity=saved.find(function(c){return c.city===city;});
+if(savedCity){savedCity.entries.push(entry);}
+else{
+  var coord2=CITY_COORDS[city]||[20+Math.random()*20,10+Math.random()*40];
+  saved.push({city:city,lat:coord2[0],lng:coord2[1],entries:[entry]});
+}
+localStorage.setItem('nada-cities',JSON.stringify(saved));
   closeAdd();showToast('已添加：'+title+' · '+city);
 }
 
