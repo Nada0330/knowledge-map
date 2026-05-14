@@ -100,17 +100,18 @@ footer{padding:40px;border-top:0.5px solid #21262d;display:flex;justify-content:
 </footer>
 
 <script>
-var NOTES = [
-  {id:1,date:"April 2026",tag:"thought",title:"On the difference between knowing and understanding",
-   preview:"There are things I can explain perfectly and still not understand. And things I understand completely but cannot explain at all.",
-   body:"There are things I can explain perfectly and still not understand. And things I understand completely but cannot explain at all.\n\nI keep thinking about Foucault's point that knowledge is produced, not discovered. If that's true, then what does it mean to 'understand' something? Is understanding just a more intimate kind of knowing? Or is it something that happens in the body, not the mind — something closer to what Mauss called body techniques?\n\nMaybe understanding is what happens when knowledge stops feeling like information and starts feeling like instinct."},
-  {id:2,date:"March 2026",tag:"question",title:"What does it mean to think in a second language?",
-   preview:"My thoughts in Chinese feel different from my thoughts in English. Not translated — genuinely different.",
-   body:"My thoughts in Chinese feel different from my thoughts in English. Not translated — genuinely different.\n\nIn Chinese I think in images and relationships. In English I think in arguments and structures. Is this because of the language, or because of what I learned in each language?\n\nSapir-Whorf hypothesis says language shapes thought. But I'm not sure it's that simple. It might be that different languages give me access to different parts of myself."},
-  {id:3,date:"February 2026",tag:"observation",title:"Everyone is performing coherence",
-   preview:"Nobody is as consistent as they appear. We edit our past selves constantly to make the story make sense.",
-   body:"Nobody is as consistent as they appear. We edit our past selves constantly to make the story make sense.\n\nI noticed this when I tried to explain why I got interested in philosophy. Every time I tell the story, I select different moments, different books, different conversations. The story changes depending on who's listening.\n\nMaybe this is what Arendt meant by natality — we are always beginning again, and the story we tell about ourselves is itself a kind of action."},
-];
+var NOTES = JSON.parse(localStorage.getItem('nada-notes') || '[]');
+if(NOTES.length === 0){
+  NOTES = [
+    {id:1,date:"April 2026",tag:"thought",title:"On the difference between knowing and understanding",
+     preview:"There are things I can explain perfectly and still not understand.",
+     body:"There are things I can explain perfectly and still not understand. And things I understand completely but cannot explain at all.\n\nMaybe understanding is what happens when knowledge stops feeling like information and starts feeling like instinct."},
+    {id:2,date:"March 2026",tag:"question",title:"What does it mean to think in a second language?",
+     preview:"My thoughts in Chinese feel different from my thoughts in English.",
+     body:"My thoughts in Chinese feel different from my thoughts in English. Not translated — genuinely different.\n\nIn Chinese I think in images and relationships. In English I think in arguments and structures."},
+  ];
+  localStorage.setItem('nada-notes', JSON.stringify(NOTES));
+}
 
 var expanded = null;
 
@@ -152,6 +153,7 @@ function addNote(){
     body: body
   };
   NOTES.unshift(note);
+  localStorage.setItem('nada-notes', JSON.stringify(NOTES));
   renderNotes();
   document.getElementById('w-title').value='';
   document.getElementById('w-date').value='';
